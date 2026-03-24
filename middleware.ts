@@ -66,7 +66,7 @@ export function middleware(request: NextRequest) {
 
   // Redirect logged-in users from / to /dashboard immediately (no flash)
   if (request.nextUrl.pathname === "/") {
-    const hasSession = request.cookies.has("better-auth.session_token");
+    const hasSession = request.cookies.has("better-auth.session_token") || request.cookies.has("__Secure-better-auth.session_token");
     if (hasSession) {
       const baseUrl = process.env.BETTER_AUTH_URL;
       if (baseUrl) {
