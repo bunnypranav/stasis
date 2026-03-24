@@ -256,14 +256,14 @@ function HorizontalFunnel({ funnel }: { funnel: { step: string; count: number }[
                 const isHover = hoveredIdx === i;
                 const isFirst = i === 0;
 
-                // For segments after the first, compute trapezoid
+                // Trapezoid: left edge = previous step's height, right edge = this step's height
+                const prevH = i > 0
+                  ? Math.max(steps[i - 1].pctOfTotal, minHeightPct)
+                  : 100;
                 const thisH = Math.max(s.pctOfTotal, minHeightPct);
-                const nextH = i < n - 1
-                  ? Math.max(steps[i + 1].pctOfTotal, minHeightPct)
-                  : thisH;
-                const leftTop = (svgH - (svgH * thisH) / 100) / 2;
+                const leftTop = (svgH - (svgH * prevH) / 100) / 2;
                 const leftBot = svgH - leftTop;
-                const rightTop = (svgH - (svgH * nextH) / 100) / 2;
+                const rightTop = (svgH - (svgH * thisH) / 100) / 2;
                 const rightBot = svgH - rightTop;
                 const points = `0,${leftTop} ${segW},${rightTop} ${segW},${rightBot} 0,${leftBot}`;
                 const baseOpacity = 1 - i * 0.09;
