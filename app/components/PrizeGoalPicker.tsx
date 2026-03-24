@@ -70,7 +70,7 @@ export function PrizeGoalPicker({ initialSelection = [], onConfirm, onBack }: Re
           <p className="text-cream-500 uppercase tracking-wide text-sm">No prizes available yet</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[50vh] overflow-y-auto pr-1">
+        <div className="grid grid-cols-1 min-[400px]:grid-cols-2 min-[700px]:grid-cols-3 gap-3">
           {items.map((item) => {
             const isSelected = selected.has(item.id);
             return (

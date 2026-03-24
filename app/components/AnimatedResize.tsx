@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useLayoutEffect, useState, type ReactNode, type CSSProperties } from 'react';
+import { useRef, useLayoutEffect, useEffect, useState, type ReactNode, type CSSProperties } from 'react';
 
 interface Props {
   children: ReactNode;
@@ -89,6 +89,21 @@ export function AnimatedResize({ children, className = '', style: externalStyle,
     rafIds.current.push(raf1);
   }, [children, duration]);
 
+  // Re-measure on window resize (snap, no animation)
+  useEffect(() => {
+    const handleResize = () => {
+      const inner = innerRef.current;
+      if (!inner) return;
+      const newW = inner.offsetWidth;
+      const newH = inner.offsetHeight;
+      lastSize.current = { w: newW, h: newH };
+      setDisplaySize({ w: newW, h: newH });
+      setPhase('idle');
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // Build transition string
   const transitionParts: string[] = [];
   if (positionTransition) {
@@ -100,19 +115,22 @@ export function AnimatedResize({ children, className = '', style: externalStyle,
     transitionParts.push(`height ${duration}ms ${EASING}`);
   }
 
+  // Only constrain size during lock/animate phases.
+  // In idle, let the outer size naturally so max-height/overflow-y-auto work on children.
+  const constrainSize = phase !== 'idle';
   const w = phase === 'lock' ? lockSize.w : displaySize?.w;
   const h = phase === 'lock' ? lockSize.h : displaySize?.h;
 
   const outerStyle: CSSProperties = {
     ...externalStyle,
-    ...(w != null && { width: w }),
-    ...(h != null && { height: h }),
+    ...(constrainSize && w != null && { width: w }),
+    ...(constrainSize && h != null && { height: h }),
     ...(transitionParts.length > 0 && { transition: transitionParts.join(', ') }),
   };
 
   return (
     <div
-      className={`overflow-hidden ${className}`}
+      className={`${constrainSize ? 'overflow-hidden' : ''} ${className}`}
       style={outerStyle}
     >
       <div ref={innerRef} style={{ width: 'fit-content' }}>

@@ -202,13 +202,17 @@ export default function ProjectsPage() {
   };
 
   const confirmGoalChange = () => {
-    if (!pickerSelection || pickerSelection === goalPreference) {
+    if (!pickerSelection) {
       setShowGoalPicker(false);
       return;
     }
     if (pickerSelection === 'prizes') {
-      // Switch to prize picker mode
+      // Switch to prize picker mode (even if already on prizes — user wants to edit)
       setGoalPickerMode('prizes');
+      return;
+    }
+    if (pickerSelection === goalPreference) {
+      setShowGoalPicker(false);
       return;
     }
     setGoalPreference(pickerSelection);
@@ -491,7 +495,7 @@ export default function ProjectsPage() {
       {showGoalPicker && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-[#3D3229]/80" onClick={() => setShowGoalPicker(false)} />
-          <AnimatedResize className="relative bg-cream-100 border-2 border-brown-800 shadow-lg mx-4 max-h-[calc(100vh-2rem)]" duration={200}>
+          <AnimatedResize className="relative bg-cream-100 border-2 border-brown-800 shadow-lg mx-4" duration={200}>
             <div className={`p-6 overflow-y-auto max-h-[calc(100vh-2rem)] ${goalPickerMode === 'goal' ? 'w-[min(1160px,95vw)]' : 'w-[min(780px,95vw)]'}`}>
               {goalPickerMode === 'goal' ? (
                 <>
