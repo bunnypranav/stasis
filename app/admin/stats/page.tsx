@@ -16,6 +16,8 @@ interface Stats {
     withProjects: number;
     fraudFlagged: number;
     signupsByMonth: { month: string; count: number }[];
+    pronouns: Record<string, number>;
+    goals: Record<string, number>;
   };
   time: {
     totalHoursClaimed: number;
@@ -726,6 +728,37 @@ export default function StatsPage() {
                 </div>
               </div>
             )}
+
+            {/* Gender Ratio */}
+            <div className="border-t border-brown-300 pt-4">
+              <h3 className="text-brown-800 text-xs uppercase tracking-wider font-semibold mb-3">Gender Ratio</h3>
+              <div className="space-y-1">
+                {Object.entries(stats.users.pronouns).map(([pronouns, count]) => (
+                  <div key={pronouns} className="flex items-center gap-2 text-sm">
+                    <span className="text-brown-800 w-28 truncate">{pronouns}</span>
+                    <span className="text-brown-800 font-mono w-10 text-right">{count}</span>
+                    <Bar value={count} max={Math.max(...Object.values(stats.users.pronouns))} />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Goal */}
+            <div className="border-t border-brown-300 pt-4">
+              <h3 className="text-brown-800 text-xs uppercase tracking-wider font-semibold mb-3">Goal</h3>
+              <div className="space-y-1">
+                {Object.entries(stats.users.goals).map(([goal, count]) => {
+                  const label = goal === 'stasis' ? 'Stasis' : goal === 'opensauce' ? 'Open Sauce' : goal === 'prizes' ? 'Prizes' : goal;
+                  return (
+                    <div key={goal} className="flex items-center gap-2 text-sm">
+                      <span className="text-brown-800 w-28 truncate">{label}</span>
+                      <span className="text-brown-800 font-mono w-10 text-right">{count}</span>
+                      <Bar value={count} max={Math.max(...Object.values(stats.users.goals))} />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </Section>
 

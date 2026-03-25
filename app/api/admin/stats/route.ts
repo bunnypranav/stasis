@@ -48,6 +48,10 @@ export async function GET() {
     // Qualification
     qualificationStats,
 
+    // User demographics
+    pronounsByCount,
+    goalByCount,
+
     // New metrics
     funnelStats,
     bitsFunnelStats,
@@ -171,6 +175,22 @@ export async function GET() {
         GROUP BY "userId"
         HAVING SUM(amount) > 0
       ) sub
+    `,
+
+    // --- User pronouns (gender ratio) ---
+    prisma.$queryRaw<{ pronouns: string | null; count: bigint }[]>`
+      SELECT pronouns, COUNT(*)::bigint as count
+      FROM "user"
+      GROUP BY pronouns
+      ORDER BY count DESC
+    `,
+
+    // --- User goal preference ---
+    prisma.$queryRaw<{ goal: string | null; count: bigint }[]>`
+      SELECT "eventPreference" as goal, COUNT(*)::bigint as count
+      FROM "user"
+      GROUP BY "eventPreference"
+      ORDER BY count DESC
     `,
 
     // --- User Funnel ---
@@ -401,6 +421,12 @@ export async function GET() {
         month: r.month,
         count: Number(r.count),
       })),
+      pronouns: Object.fromEntries(
+        pronounsByCount.map((r) => [r.pronouns ?? 'Not set', Number(r.count)])
+      ),
+      goals: Object.fromEntries(
+        goalByCount.map((r) => [r.goal ?? 'Not set', Number(r.count)])
+      ),
     },
     time: {
       totalHoursClaimed: Math.round((timeAggregates._sum.hoursClaimed ?? 0) * 10) / 10,
