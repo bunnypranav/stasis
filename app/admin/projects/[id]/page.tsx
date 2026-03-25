@@ -116,6 +116,7 @@ interface AdminProject {
   bomItems: BOMItem[];
   reviewActions: ReviewAction[];
   hiddenFromGallery: boolean;
+  deletedAt: string | null;
   hackatimeProjects: HackatimeProjectData[];
   hackatimeTrustLevel: string | null;
 }
@@ -257,6 +258,8 @@ export default function AdminProjectPage({ params }: { params: Promise<{ id: str
       unhide: 'Unhide this project (make it visible in the gallery again)?',
       unapprove_design: 'Unapprove the design? This will reset design status to in_review and build status to draft.',
       unapprove_build: 'Unapprove the build? This will reset build status to in_review.',
+      delete: 'Soft-delete this project? It will be hidden from all non-admin views.',
+      undelete: 'Restore this project? It will become visible again.',
     };
     if (!confirm(confirmMessages[action] || `Perform action: ${action}?`)) return;
 
@@ -546,6 +549,16 @@ export default function AdminProjectPage({ params }: { params: Promise<{ id: str
             </div>
           )}
 
+          {/* Deleted Banner */}
+          {project.deletedAt && (
+            <div className="mb-6 bg-red-100 border-2 border-red-500 p-4">
+              <div className="flex items-center gap-2">
+                <span className="text-red-800 font-bold text-sm uppercase tracking-wider">This project is deleted</span>
+                <span className="text-red-600 text-xs">— soft-deleted on {new Date(project.deletedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+              </div>
+            </div>
+          )}
+
           {/* Stage Progress */}
           <div className="mb-6 bg-cream-100 border-2 border-cream-400 p-6">
             <StageProgress
@@ -627,6 +640,18 @@ export default function AdminProjectPage({ params }: { params: Promise<{ id: str
                     {airtableSyncing ? 'Syncing...' : 'Sync to Airtable'}
                   </button>
                 )}
+                {/* Delete / Undelete */}
+                <button
+                  onClick={() => handleAdminAction(project.deletedAt ? 'undelete' : 'delete')}
+                  disabled={adminActioning}
+                  className={`px-3 py-1.5 text-xs uppercase tracking-wider border transition-colors cursor-pointer disabled:opacity-50 ${
+                    project.deletedAt
+                      ? 'bg-green-600/20 border-green-600 text-green-600 hover:bg-green-600/30'
+                      : 'bg-red-600/10 border-red-600 text-red-600 hover:bg-red-600/20'
+                  }`}
+                >
+                  {project.deletedAt ? 'Undelete Project' : 'Delete Project'}
+                </button>
               </div>
             )}
           </div>

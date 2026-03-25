@@ -23,6 +23,7 @@ interface ProjectItem {
   isStarter: boolean;
   starterProjectId: string | null;
   hiddenFromGallery: boolean;
+  deletedAt: string | null;
   createdAt: string;
   updatedAt: string;
   user: ProjectUser;
@@ -76,6 +77,7 @@ export default function AdminProjectsPage() {
   const [starterFilter, setStarterFilter] = useState('');
   const [hiddenFilter, setHiddenFilter] = useState('');
   const [zeroGrant, setZeroGrant] = useState(false);
+  const [deletedFilter, setDeletedFilter] = useState('');
   const [page, setPage] = useState(1);
 
   const fetchProjects = useCallback(async () => {
@@ -89,6 +91,7 @@ export default function AdminProjectsPage() {
       if (starterFilter) params.set('starter', starterFilter);
       if (hiddenFilter) params.set('hidden', hiddenFilter);
       if (zeroGrant) params.set('zeroGrant', 'true');
+      if (deletedFilter) params.set('deleted', deletedFilter);
       params.set('page', page.toString());
       const res = await fetch(`/api/admin/projects/list?${params}`);
       if (res.ok) setData(await res.json());
@@ -97,7 +100,7 @@ export default function AdminProjectsPage() {
     } finally {
       setLoading(false);
     }
-  }, [search, designStatus, buildStatus, tierFilter, starterFilter, hiddenFilter, zeroGrant, page]);
+  }, [search, designStatus, buildStatus, tierFilter, starterFilter, hiddenFilter, zeroGrant, deletedFilter, page]);
 
   useEffect(() => { fetchProjects(); }, [fetchProjects]);
 
@@ -116,10 +119,11 @@ export default function AdminProjectsPage() {
     setStarterFilter('');
     setHiddenFilter('');
     setZeroGrant(false);
+    setDeletedFilter('');
     setPage(1);
   };
 
-  const hasFilters = search || designStatus || buildStatus || tierFilter || starterFilter || hiddenFilter || zeroGrant;
+  const hasFilters = search || designStatus || buildStatus || tierFilter || starterFilter || hiddenFilter || zeroGrant || deletedFilter;
 
   return (
     <>
@@ -233,6 +237,16 @@ export default function AdminProjectsPage() {
               <FilterButton active={zeroGrant} onClick={() => { setZeroGrant(true); setPage(1); }} label="$0 Grant" />
             </div>
           </div>
+
+          {/* Deleted */}
+          <div className="flex items-center gap-2">
+            <span className="text-brown-800 text-xs uppercase tracking-wider">Deleted:</span>
+            <div className="flex gap-1">
+              <FilterButton active={deletedFilter === ''} onClick={() => { setDeletedFilter(''); setPage(1); }} label="All" />
+              <FilterButton active={deletedFilter === 'true'} onClick={() => { setDeletedFilter('true'); setPage(1); }} label="Deleted" />
+              <FilterButton active={deletedFilter === 'false'} onClick={() => { setDeletedFilter('false'); setPage(1); }} label="Not Deleted" />
+            </div>
+          </div>
         </div>
       </div>
 
@@ -269,7 +283,7 @@ export default function AdminProjectsPage() {
                   return (
                     <tr
                       key={project.id}
-                      className={`border-b border-cream-300 hover:bg-cream-200/50 transition-colors ${project.hiddenFromGallery ? 'opacity-60' : ''}`}
+                      className={`border-b border-cream-300 hover:bg-cream-200/50 transition-colors ${project.hiddenFromGallery ? 'opacity-60' : ''} ${project.deletedAt ? 'border-l-4 border-l-red-500 bg-red-50/30' : ''}`}
                     >
                       <td className="px-3 py-3">
                         <div className="flex items-center gap-2">
@@ -284,7 +298,10 @@ export default function AdminProjectsPage() {
                             <p className="text-sm font-medium truncate max-w-[200px] text-brown-800">
                               {project.title}
                             </p>
-                            {project.hiddenFromGallery && (
+                            {project.deletedAt && (
+                              <span className="text-xs text-red-600 uppercase font-medium">Deleted</span>
+                            )}
+                            {project.hiddenFromGallery && !project.deletedAt && (
                               <span className="text-xs text-gray-500 uppercase">Hidden</span>
                             )}
                           </div>

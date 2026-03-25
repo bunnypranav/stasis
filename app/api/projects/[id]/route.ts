@@ -88,7 +88,7 @@ export async function GET(
     },
   })
 
-  if (!project) {
+  if (!project || project.deletedAt) {
     return NextResponse.json({ error: "Project not found" }, { status: 404 })
   }
 
@@ -125,7 +125,7 @@ export async function PATCH(
     where: { id },
   })
 
-  if (!existingProject) {
+  if (!existingProject || existingProject.deletedAt) {
     return NextResponse.json({ error: "Project not found" }, { status: 404 })
   }
 
@@ -181,7 +181,7 @@ export async function DELETE(
     where: { id },
   })
 
-  if (!existingProject) {
+  if (!existingProject || existingProject.deletedAt) {
     return NextResponse.json({ error: "Project not found" }, { status: 404 })
   }
 

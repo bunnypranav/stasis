@@ -202,6 +202,7 @@ model Project {
   tier             Int?
   bitsAwarded           Int?          // Set atomically at build approval; null until then
   hiddenFromGallery     Boolean       @default(false)
+  deletedAt             DateTime?
 
   // Stage-based status tracking
   designStatus          ProjectStatus @default(draft)
@@ -415,6 +416,8 @@ enum AuditAction {
   ADMIN_REVIEW_HACKATIME
   ADMIN_APPROVE_BOM
   ADMIN_REJECT_BOM
+  ADMIN_DELETE_PROJECT
+  ADMIN_UNDELETE_PROJECT
   
   REVIEWER_APPROVE
   REVIEWER_RETURN

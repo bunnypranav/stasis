@@ -56,10 +56,10 @@ export async function GET(
 
   const project = await prisma.project.findUnique({
     where: { id: projectId },
-    select: { userId: true },
+    select: { userId: true, deletedAt: true },
   })
 
-  if (!project) {
+  if (!project || project.deletedAt) {
     return NextResponse.json({ error: "Project not found" }, { status: 404 })
   }
 
@@ -93,10 +93,10 @@ export async function POST(
 
   const project = await prisma.project.findUnique({
     where: { id: projectId },
-    select: { userId: true, designStatus: true, buildStatus: true },
+    select: { userId: true, deletedAt: true, designStatus: true, buildStatus: true },
   })
 
-  if (!project) {
+  if (!project || project.deletedAt) {
     return NextResponse.json({ error: "Project not found" }, { status: 404 })
   }
 

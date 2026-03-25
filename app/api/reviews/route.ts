@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
 
   // Query projects directly — works whether or not ProjectSubmission rows exist
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const projectWhere: any = {}
+  const projectWhere: any = { deletedAt: null }
 
   // Filter by stage/status
   if (category === "DESIGN") {

@@ -115,6 +115,18 @@ export async function PATCH(
   const adminId = authCheck.session.user.id
   const adminEmail = authCheck.session.user.email ?? undefined
 
+  if (action === "delete") {
+    await prisma.project.update({ where: { id }, data: { deletedAt: new Date() } })
+    await logAdminAction(AuditAction.ADMIN_DELETE_PROJECT, adminId, adminEmail, "Project", id, { title: project.title })
+    return NextResponse.json({ deletedAt: new Date().toISOString() })
+  }
+
+  if (action === "undelete") {
+    await prisma.project.update({ where: { id }, data: { deletedAt: null } })
+    await logAdminAction(AuditAction.ADMIN_UNDELETE_PROJECT, adminId, adminEmail, "Project", id, { title: project.title })
+    return NextResponse.json({ deletedAt: null })
+  }
+
   if (action === "hide") {
     await prisma.project.update({ where: { id }, data: { hiddenFromGallery: true } })
     await logAdminAction(AuditAction.ADMIN_HIDE_PROJECT, adminId, adminEmail, "Project", id)

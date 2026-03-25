@@ -78,11 +78,13 @@ export async function GET(
     let githubRepo: string | null = null;
     const project = await prisma.project.findUnique({
       where: { id },
-      select: { githubRepo: true },
+      select: { githubRepo: true, deletedAt: true },
     });
 
-    if (project) {
+    if (project && !project.deletedAt) {
       githubRepo = project.githubRepo;
+    } else if (project && project.deletedAt) {
+      return NextResponse.json({ error: 'Project not found — it may have been deleted' }, { status: 404 });
     } else {
       const submission = await prisma.projectSubmission.findUnique({
         where: { id },

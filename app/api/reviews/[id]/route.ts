@@ -60,7 +60,7 @@ export async function GET(
     }
   }
 
-  if (!project) {
+  if (!project || project.deletedAt) {
     return NextResponse.json({ error: "Project not found" }, { status: 404 })
   }
 
@@ -76,6 +76,7 @@ export async function GET(
   // Check for conflicts — other projects by same author in review
   const conflicts = await prisma.project.findMany({
     where: {
+      deletedAt: null,
       id: { not: project.id },
       userId: project.userId,
       OR: [
@@ -247,6 +248,7 @@ export async function GET(
   // Find next/prev projects for navigation
   const allProjects = await prisma.project.findMany({
     where: {
+      deletedAt: null,
       OR: [
         { designStatus: "in_review" },
         { buildStatus: "in_review" },
