@@ -248,6 +248,7 @@ export async function GET(
   // Find next/prev projects for navigation (respecting optional filters)
   const navCategory = _request.nextUrl.searchParams.get("category") || ""
   const navGuide = _request.nextUrl.searchParams.get("guide") || ""
+  const navNameSearch = _request.nextUrl.searchParams.get("nameSearch") || ""
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const navWhere: any = { deletedAt: null }
@@ -265,6 +266,19 @@ export async function GET(
     navWhere.starterProjectId = null
   } else if (navGuide) {
     navWhere.starterProjectId = navGuide
+  }
+  if (navNameSearch) {
+    const statusFilter = navWhere.OR
+    delete navWhere.OR
+    navWhere.AND = [
+      ...(statusFilter ? [{ OR: statusFilter }] : []),
+      {
+        OR: [
+          { title: { contains: navNameSearch, mode: "insensitive" } },
+          { description: { contains: navNameSearch, mode: "insensitive" } },
+        ],
+      },
+    ]
   }
 
   const allProjects = await prisma.project.findMany({

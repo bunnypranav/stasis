@@ -15,6 +15,8 @@ export async function GET(request: NextRequest) {
   const search = url.searchParams.get("search") || ""
   const category = url.searchParams.get("category") || "" // DESIGN or BUILD
   const guide = url.searchParams.get("guide") || "" // starter project ID filter
+  const nameSearch = url.searchParams.get("nameSearch") || "" // text search on title/description
+  const sort = url.searchParams.get("sort") || "" // "most_hours" for descending hours sort
   const page = Math.max(1, parseInt(url.searchParams.get("page") || "1"))
   const limit = Math.min(50, Math.max(1, parseInt(url.searchParams.get("limit") || "20")))
   const offset = (page - 1) * limit
@@ -49,6 +51,22 @@ export async function GET(request: NextRequest) {
     }
   }
 
+  // Name-based text search (e.g. "devboard" or "keyboard" in title/description)
+  if (nameSearch) {
+    const statusFilter = projectWhere.OR
+    delete projectWhere.OR
+    projectWhere.AND = [
+      ...(statusFilter ? [{ OR: statusFilter }] : []),
+      ...(projectWhere.AND || []),
+      {
+        OR: [
+          { title: { contains: nameSearch, mode: "insensitive" } },
+          { description: { contains: nameSearch, mode: "insensitive" } },
+        ],
+      },
+    ]
+  }
+
   // Search filter
   if (search) {
     // Wrap existing OR in AND to combine with search
@@ -56,6 +74,7 @@ export async function GET(request: NextRequest) {
     delete projectWhere.OR
     projectWhere.AND = [
       ...(statusFilter ? [{ OR: statusFilter }] : []),
+      ...(projectWhere.AND || []),
       {
         OR: [
           { title: { contains: search, mode: "insensitive" } },
@@ -133,6 +152,11 @@ export async function GET(request: NextRequest) {
       starterProjectId: project.starterProjectId,
     }
   })
+
+  // Sort by most hours if requested
+  if (sort === "most_hours") {
+    items.sort((a, b) => b.workUnits - a.workUnits)
+  }
 
   // For admins, sort pre-reviewed items to the top
   if (isAdmin) {

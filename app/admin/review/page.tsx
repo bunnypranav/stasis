@@ -83,17 +83,21 @@ export default function ReviewQueuePage() {
   const [searchInput, setSearchInput] = useState('');
   const [category, setCategory] = useState('');
   const [guide, setGuide] = useState('');
+  const [nameSearch, setNameSearch] = useState('');
+  const [sort, setSort] = useState('');
   const [page, setPage] = useState(1);
   const [statsTab, setStatsTab] = useState<'weekly' | 'allTime'>('weekly');
   const [navigating, setNavigating] = useState(false);
 
   // Navigate into the review flow with a filter applied
-  async function startFilteredReview(filterCategory: string, filterGuide: string) {
+  async function startFilteredReview(filterCategory: string, filterGuide: string, filterNameSearch?: string, filterSort?: string) {
     setNavigating(true);
     try {
       const params = new URLSearchParams();
       if (filterCategory) params.set('category', filterCategory);
       if (filterGuide) params.set('guide', filterGuide);
+      if (filterNameSearch) params.set('nameSearch', filterNameSearch);
+      if (filterSort) params.set('sort', filterSort);
       params.set('limit', '1');
       const res = await fetch(`/api/reviews?${params}`);
       if (res.ok) {
@@ -102,6 +106,8 @@ export default function ReviewQueuePage() {
           const qp = new URLSearchParams();
           if (filterCategory) qp.set('category', filterCategory);
           if (filterGuide) qp.set('guide', filterGuide);
+          if (filterNameSearch) qp.set('nameSearch', filterNameSearch);
+          if (filterSort) qp.set('sort', filterSort);
           router.push(`/admin/review/${items[0].id}?${qp}`);
           return;
         }
@@ -121,6 +127,8 @@ export default function ReviewQueuePage() {
       if (search) params.set('search', search);
       if (category) params.set('category', category);
       if (guide) params.set('guide', guide);
+      if (nameSearch) params.set('nameSearch', nameSearch);
+      if (sort) params.set('sort', sort);
       params.set('page', page.toString());
       const res = await fetch(`/api/reviews?${params}`);
       if (res.ok) setData(await res.json());
@@ -129,7 +137,7 @@ export default function ReviewQueuePage() {
     } finally {
       setLoading(false);
     }
-  }, [search, category, guide, page]);
+  }, [search, category, guide, nameSearch, sort, page]);
 
   const fetchStats = useCallback(async () => {
     try {
@@ -286,7 +294,40 @@ export default function ReviewQueuePage() {
           <span className="border-l border-cream-400 mx-1 hidden sm:inline-block" />
 
           <button
-            onClick={() => startFilteredReview(category, guide)}
+            onClick={() => { setNameSearch(nameSearch === 'devboard' ? '' : 'devboard'); setCategory(''); setGuide(''); setPage(1); }}
+            className={`px-3 py-1.5 text-xs uppercase tracking-wider border cursor-pointer ${
+              nameSearch === 'devboard'
+                ? 'border-orange-500 text-orange-500 bg-orange-500/10'
+                : 'border-cream-400 text-brown-800 hover:border-orange-500'
+            }`}
+          >
+            Devboard (name)
+          </button>
+          <button
+            onClick={() => { setNameSearch(nameSearch === 'keyboard' ? '' : 'keyboard'); setCategory(''); setGuide(''); setPage(1); }}
+            className={`px-3 py-1.5 text-xs uppercase tracking-wider border cursor-pointer ${
+              nameSearch === 'keyboard'
+                ? 'border-orange-500 text-orange-500 bg-orange-500/10'
+                : 'border-cream-400 text-brown-800 hover:border-orange-500'
+            }`}
+          >
+            Keyboard (name)
+          </button>
+          <button
+            onClick={() => { setSort(sort === 'most_hours' ? '' : 'most_hours'); setPage(1); }}
+            className={`px-3 py-1.5 text-xs uppercase tracking-wider border cursor-pointer ${
+              sort === 'most_hours'
+                ? 'border-orange-500 text-orange-500 bg-orange-500/10'
+                : 'border-cream-400 text-brown-800 hover:border-orange-500'
+            }`}
+          >
+            Most Hours
+          </button>
+
+          <span className="border-l border-cream-400 mx-1 hidden sm:inline-block" />
+
+          <button
+            onClick={() => startFilteredReview(category, guide, nameSearch, sort)}
             disabled={navigating}
             className="px-4 py-1.5 text-xs uppercase tracking-wider border border-orange-500 bg-orange-500 text-white hover:bg-orange-600 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >

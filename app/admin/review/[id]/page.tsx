@@ -24,6 +24,7 @@ interface ReviewData {
       tier: number | null;
       tags: string[];
       noBomNeeded: boolean;
+      starterProjectId: string | null;
       cartScreenshots: string[];
       totalWorkUnits: number;
       entryCount: number;
@@ -95,6 +96,36 @@ interface ReviewData {
   reviewerId: string;
 }
 
+// ─── Shortcut Data ──────────────────────────────────────────────────
+
+const HOURS_BY_GUIDE: Record<string, number> = {
+  'devboard': 15,
+  'squeak': 5,
+  'blinky': 5,
+};
+
+const JUSTIFICATION_SHORTCUTS = [
+  { label: 'High quality devboard', text: 'This project follows our devboard guide which typically takes 15-20 hours to complete. This project however, is signifigantly higher quality so I am going to deflate only a bit and keep it above that range.' },
+  { label: 'Normal devboard', text: 'This project follows our devboard guide which typically takes 15-20 hours to complete. This project is a normal devboard within this range so I am deflating it only a bit.' },
+  { label: 'Low hour devboard', text: 'This project follows our devboard guide which typically takes 15-20 hours to complete. This project reported below this range so I am deflating less.' },
+  { label: 'High quality keyboard', text: 'This project is a typical full-sized keyboard with a PCB and case which takes around 15-20 hours to complete. This project however, is signifigantly higher quality so I am going to deflate only a bit and keep it above that range.' },
+  { label: 'Normal keyboard', text: 'This project is a typical full-sized keyboard with a PCB and case which takes around 15-20 hours to complete. This project is a normal keyboard within this range so I am deflating it only a bit.' },
+  { label: 'Low hour keyboard', text: 'This project is a typical full-sized keyboard with a PCB and case which takes around 15-20 hours to complete. This project reported below this range so I am deflating less.' },
+  { label: 'Generic low', text: 'This project has a very high quality journal and all of the hours are logged. I am deflating this just to be safe.' },
+  { label: 'Generic high', text: 'This project has a very high quality and is shipped. However, some of the journal entries are long and don\'t make sense so I am deflating it more' },
+  { label: 'Small', text: 'This is a relatively small project and not that crazy. It seems to be one of the users first and is definitely shipped. Because of that, I am approving regardless.' },
+  { label: 'Magic', text: 'This project has a incredubly high quality project and all of the hours are logged. I would say this project would qualify as magic. I am deflating this just to be safe.' },
+  { label: 'Trusted', text: 'This is a very trusted user and I have talked with this person multiple times about this project and seen them working on it throughout Slack.' },
+];
+
+const FEEDBACK_SHORTCUTS = [
+  { label: 'Optimize BOM', text: 'The parts list for this project can be cost optimized. Please look into alternative vendors for your parts. Please read this to help: https://blueprint.hackclub.com/resources/parts-sourcing.' },
+  { label: 'Missing PCB source', text: 'This is a PCB project but you seem to be missing some or all of the required PCB files such as .kicad_pcb, .kicad_pro, .kicad_sch, and gerbers. Please read the submission guidelines at https://blueprint.hackclub.com/about/submission-guidelines.' },
+  { label: 'Missing CAD files', text: 'This project has CAD but seems to be missing some or all of the required CAD files such as .step, .f3d, etc. Please read the submission guidelines before you resubmit. https://blueprint.hackclub.com/about/submission-guidelines.' },
+  { label: 'Missing/Bad ReadME', text: 'Please make a more polished ReadME.md on your GitHub. Your ReadMe should include multiple photos of your project, photos of the full assembly such as PCB+Case, and have a good description of your project. Please read the submission guidelines before you resubmit. https://blueprint.hackclub.com/about/submission-guidelines.' },
+  { label: 'Journal', text: 'Your journal needs to show the step-by-step process you took in making this project. Please break your larger journal entires into multiple smaller ones, show the steps you took, and explain it better.' },
+];
+
 // ─── Component ───────────────────────────────────────────────────────
 
 export default function ReviewDetailPage() {
@@ -104,12 +135,16 @@ export default function ReviewDetailPage() {
   const id = params.id as string;
   const filterCategory = searchParams.get('category') || '';
   const filterGuide = searchParams.get('guide') || '';
+  const filterNameSearch = searchParams.get('nameSearch') || '';
+  const filterSort = searchParams.get('sort') || '';
 
   // Build query string for filter-aware navigation
   const filterQS = (() => {
     const qp = new URLSearchParams();
     if (filterCategory) qp.set('category', filterCategory);
     if (filterGuide) qp.set('guide', filterGuide);
+    if (filterNameSearch) qp.set('nameSearch', filterNameSearch);
+    if (filterSort) qp.set('sort', filterSort);
     const s = qp.toString();
     return s ? `?${s}` : '';
   })();
@@ -136,6 +171,8 @@ export default function ReviewDetailPage() {
   const [showFraudWarning, setShowFraudWarning] = useState(true);
   const [flaggingFraud, setFlaggingFraud] = useState(false);
   const [modifyingPreReview, setModifyingPreReview] = useState(false);
+  const [checkedJustifications, setCheckedJustifications] = useState<Set<number>>(new Set());
+  const [checkedFeedback, setCheckedFeedback] = useState<Set<number>>(new Set());
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -156,6 +193,31 @@ export default function ReviewDetailPage() {
   }, [id, router, filterQS]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
+
+  // Auto-populate work units override based on starter project guide
+  useEffect(() => {
+    if (!data) return;
+    const guideId = data.submission.project.starterProjectId;
+    if (guideId && HOURS_BY_GUIDE[guideId] && !workUnitsOverride) {
+      setWorkUnitsOverride(String(HOURS_BY_GUIDE[guideId]));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data?.submission.project.starterProjectId]);
+
+  // Ctrl+Enter keyboard shortcut to approve
+  useEffect(() => {
+    function handleKeydown(e: KeyboardEvent) {
+      if (e.ctrlKey && e.key === 'Enter') {
+        e.preventDefault();
+        if (!submitting && data && !data.submission.claimedByOther) {
+          submitReview('APPROVED');
+        }
+      }
+    }
+    document.addEventListener('keydown', handleKeydown);
+    return () => document.removeEventListener('keydown', handleKeydown);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [submitting, data, feedback, reason, workUnitsOverride, tierOverride, grantOverride, categoryOverride]);
 
   // Fetch GitHub checks when submission loads
   useEffect(() => {
@@ -209,6 +271,26 @@ export default function ReviewDetailPage() {
     }
   }
 
+  function toggleJustification(idx: number) {
+    setCheckedJustifications(prev => {
+      const next = new Set(prev);
+      if (next.has(idx)) next.delete(idx); else next.add(idx);
+      const texts = JUSTIFICATION_SHORTCUTS.filter((_, i) => next.has(i)).map(s => s.text);
+      setReason(texts.join('\n\n'));
+      return next;
+    });
+  }
+
+  function toggleFeedback(idx: number) {
+    setCheckedFeedback(prev => {
+      const next = new Set(prev);
+      if (next.has(idx)) next.delete(idx); else next.add(idx);
+      const texts = FEEDBACK_SHORTCUTS.filter((_, i) => next.has(i)).map(s => s.text);
+      setFeedback(texts.join('\n\n'));
+      return next;
+    });
+  }
+
   function handleNoteChange(value: string) {
     setInternalNote(value);
     if (noteTimeout.current) clearTimeout(noteTimeout.current);
@@ -223,13 +305,9 @@ export default function ReviewDetailPage() {
     grantOverride?: number;
     firstPassReviewerId?: string;
   }) {
-    const effectiveFeedback = overrides?.feedback ?? feedback.trim();
-    if (!effectiveFeedback) {
-      alert('Feedback for submitter is required.');
-      return;
-    }
+    const effectiveFeedback = (overrides?.feedback ?? feedback.trim()) || 'Awesome project!';
 
-    if ((result === 'APPROVED' || result === 'REJECTED') && !confirm(`Are you sure you want to ${result.toLowerCase()} this submission?`)) {
+    if (result === 'REJECTED' && !confirm('Are you sure you want to permanently reject this submission?')) {
       return;
     }
 
@@ -431,9 +509,9 @@ export default function ReviewDetailPage() {
           >
             Skip
           </button>
-          {(filterCategory || filterGuide) && (
+          {(filterCategory || filterGuide || filterNameSearch || filterSort) && (
             <span className="px-2 py-0.5 text-xs uppercase tracking-wider bg-orange-500/10 border border-orange-500 text-orange-500">
-              Filtering: {filterCategory || filterGuide || 'All'}
+              Filtering: {[filterCategory, filterGuide, filterNameSearch && `name:${filterNameSearch}`, filterSort].filter(Boolean).join(' + ') || 'All'}
             </span>
           )}
         </div>
@@ -940,25 +1018,66 @@ export default function ReviewDetailPage() {
             </div>
 
             <div className="mb-4">
-              <label className="text-cream-600 text-xs uppercase block mb-1">Internal Justification (required for approval)</label>
+              <label className="text-cream-600 text-xs uppercase block mb-1">Internal Justification</label>
+              {isAdmin && (
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  {JUSTIFICATION_SHORTCUTS.map((s, i) => (
+                    <label
+                      key={i}
+                      className={`flex items-center gap-1.5 px-2.5 py-1 text-xs border cursor-pointer transition-colors select-none ${
+                        checkedJustifications.has(i)
+                          ? 'bg-green-100 border-green-500 text-green-800'
+                          : 'border-cream-400 text-brown-800 hover:border-green-400 hover:bg-green-50'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={checkedJustifications.has(i)}
+                        onChange={() => toggleJustification(i)}
+                        className="accent-green-600 w-3 h-3"
+                      />
+                      {s.label}
+                    </label>
+                  ))}
+                </div>
+              )}
               <textarea
                 value={reason}
-                onChange={(e) => setReason(e.target.value)}
+                onChange={(e) => { setReason(e.target.value); setCheckedJustifications(new Set()); }}
                 className="w-full h-20 px-3 py-2 text-sm border border-cream-400 bg-cream-50 text-brown-800 focus:outline-none focus:border-orange-500 resize-y"
                 placeholder="Internal reason for your decision (not shown to submitter)..."
               />
             </div>
 
             <div className="mb-4">
-              <label className="text-cream-600 text-xs uppercase block mb-1">
-                Feedback for Submitter <span className="text-red-500">*</span>
-              </label>
+              <label className="text-cream-600 text-xs uppercase block mb-1">Feedback for Submitter</label>
+              {isAdmin && (
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  {FEEDBACK_SHORTCUTS.map((s, i) => (
+                    <label
+                      key={i}
+                      className={`flex items-center gap-1.5 px-2.5 py-1 text-xs border cursor-pointer transition-colors select-none ${
+                        checkedFeedback.has(i)
+                          ? 'bg-yellow-100 border-yellow-500 text-yellow-800'
+                          : 'border-cream-400 text-brown-800 hover:border-yellow-400 hover:bg-yellow-50'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={checkedFeedback.has(i)}
+                        onChange={() => toggleFeedback(i)}
+                        className="accent-yellow-600 w-3 h-3"
+                      />
+                      {s.label}
+                    </label>
+                  ))}
+                </div>
+              )}
               <textarea
                 value={feedback}
-                onChange={(e) => setFeedback(e.target.value)}
+                onChange={(e) => { setFeedback(e.target.value); setCheckedFeedback(new Set()); }}
                 className="w-full h-24 px-3 py-2 text-sm border border-cream-400 bg-cream-50 text-brown-800 focus:outline-none focus:border-orange-500 resize-y"
-                placeholder="Feedback visible to the submitter..."
-                required
+                placeholder="Feedback visible to the submitter (defaults to 'Awesome project!' if blank)..."
               />
             </div>
 
@@ -1079,14 +1198,15 @@ export default function ReviewDetailPage() {
                   </div>
                 )}
 
-                <div className="flex gap-3 flex-wrap">
+                <div className="flex gap-3 flex-wrap items-center">
                   <button
                     onClick={() => submitReview('APPROVED')}
                     disabled={submitting || project.user.fraudConvicted}
-                    title={project.user.fraudConvicted ? 'Cannot approve fraud-convicted users' : isAdmin ? undefined : 'First-pass review — an admin will finalize'}
+                    title={project.user.fraudConvicted ? 'Cannot approve fraud-convicted users' : 'Ctrl+Enter'}
                     className="px-4 py-2 text-sm uppercase tracking-wider bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
                   >
                     {isAdmin ? 'Approve' : 'First-Pass Approve'}
+                    <span className="ml-2 text-xs opacity-60 hidden sm:inline">Ctrl+Enter</span>
                   </button>
                   <button
                     onClick={() => submitReview('RETURNED')}
