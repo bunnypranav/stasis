@@ -433,7 +433,7 @@ export default function ReviewDetailPage() {
   const claimExpiry = submission.claim ? new Date(submission.claim.expiresAt) : null;
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <div className="space-y-6">
       {/* ── Claim Warning Banner ── */}
       {claimedByOther && (
         <div className="bg-red-50 border-2 border-red-300 p-4 flex items-center justify-between">
