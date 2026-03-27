@@ -50,14 +50,14 @@ export default function AdminSlackPage() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl text-brown-800 uppercase tracking-wide">Slack Jobs</h2>
+      <h2 className="text-2xl text-cream-50 uppercase tracking-wide">Slack Jobs</h2>
 
-      <div className="bg-cream-100 border border-cream-400 p-6 space-y-4">
+      <div className="bg-brown-800 border border-cream-500/20 p-6 space-y-4">
         <div>
-          <h3 className="text-lg text-brown-800 uppercase tracking-wide">Invite Girls to Channel</h3>
-          <p className="text-brown-800/70 text-sm mt-1">
+          <h3 className="text-lg text-cream-50 uppercase tracking-wide">Invite Girls to Channel</h3>
+          <p className="text-cream-50/70 text-sm mt-1">
             Finds all users with she/her pronouns and invites them to{' '}
-            <code className="bg-cream-200 px-1">#stasis-secret-spot</code> channel. Users already in the channel will be skipped.
+            <code className="bg-brown-900 px-1">#stasis-secret-spot</code> channel. Users already in the channel will be skipped.
           </p>
         </div>
 
@@ -78,9 +78,9 @@ export default function AdminSlackPage() {
         {result && (
           <div className="space-y-3">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
-              <div className="bg-cream-200 p-3 text-center">
-                <div className="text-2xl text-brown-800 font-bold">{result.total}</div>
-                <div className="text-brown-800/70 uppercase text-xs">Total Users</div>
+              <div className="bg-brown-900 p-3 text-center">
+                <div className="text-2xl text-cream-50 font-bold">{result.total}</div>
+                <div className="text-cream-50/70 uppercase text-xs">Total Users</div>
               </div>
               <div className="bg-green-100 p-3 text-center">
                 <div className="text-2xl text-green-800 font-bold">{result.invited}</div>
@@ -98,7 +98,7 @@ export default function AdminSlackPage() {
 
             {result.results.filter((r) => !r.ok).length > 0 && (
               <div className="text-sm">
-                <h4 className="text-brown-800 uppercase tracking-wide text-xs mb-2">Failed Invites</h4>
+                <h4 className="text-cream-50 uppercase tracking-wide text-xs mb-2">Failed Invites</h4>
                 <div className="space-y-1">
                   {result.results
                     .filter((r) => !r.ok)

@@ -3,7 +3,7 @@
 import { useSession, signOut } from "@/lib/auth-client";
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect } from 'react';
-import { PlatformNoiseOverlay } from '@/app/components/PlatformNoiseOverlay';
+
 import Link from 'next/link';
 import { useRoles, Permission } from '@/lib/hooks/useRoles';
 
@@ -37,13 +37,13 @@ export default function AdminLayout({
     return `px-3 sm:px-6 py-3 text-sm uppercase tracking-wider whitespace-nowrap transition-colors border-b-2 -mb-[2px] ${
       isActive
         ? 'text-orange-500 border-orange-500'
-        : 'text-brown-800 border-transparent hover:text-brown-800'
+        : 'text-cream-200 border-transparent hover:text-cream-50'
     }`;
   };
 
   if (isLoading || !isAuthorized) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-cream-200 font-mono">
+      <div className="min-h-screen flex items-center justify-center bg-brown-900 font-mono">
         <div className="loader" />
       </div>
     );
@@ -51,11 +51,11 @@ export default function AdminLayout({
 
   return (
     <>
-      <div className="min-h-screen bg-cream-200 font-mono">
+      <div className="min-h-screen bg-brown-900 font-mono">
         {/* Header */}
-        <div className="px-6 py-4 flex items-center justify-between border-b border-cream-400">
+        <div className="px-6 py-4 flex items-center justify-between border-b border-brown-800">
           <div className="flex items-center gap-4">
-            <Link href="/dashboard" className="text-brown-800 hover:text-orange-500 transition-colors">
+            <Link href="/dashboard" className="text-cream-100 hover:text-orange-500 transition-colors">
               <svg 
                 xmlns="http://www.w3.org/2000/svg" 
                 width="24" 
@@ -77,13 +77,13 @@ export default function AdminLayout({
                 alt=""
                 className="w-8 h-8 border-2 border-orange-500"
               />
-              <span className="text-brown-800 text-sm hidden sm:block">
+              <span className="text-cream-100 text-sm hidden sm:block">
                 {session?.user.name || session?.user.email}
               </span>
             </div>
             <button
               onClick={() => signOut({ fetchOptions: { onSuccess: () => { window.location.href = '/' } } })}
-              className="text-brown-800 hover:text-orange-500 text-sm uppercase transition-colors cursor-pointer"
+              className="text-cream-200 hover:text-orange-500 text-sm uppercase transition-colors cursor-pointer"
             >
               Sign Out
             </button>
@@ -91,7 +91,7 @@ export default function AdminLayout({
         </div>
 
         {/* Tabs */}
-        <div className="border-b border-cream-400">
+        <div className="border-b border-brown-800">
           <div className="px-4">
             <div className="flex overflow-x-auto gap-0">
               <Link href="/admin/review" className={getTabClass('/admin/review')}>
@@ -164,7 +164,6 @@ export default function AdminLayout({
         </div>
       </div>
 
-      <PlatformNoiseOverlay />
     </>
   );
 }

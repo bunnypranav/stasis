@@ -424,7 +424,7 @@ export default function ReviewDetailPage() {
   if (loading || !data) {
     return (
       <div className="text-center py-12">
-        <p className="text-brown-800">Loading submission...</p>
+        <p className="text-cream-50">Loading submission...</p>
       </div>
     );
   }
@@ -441,16 +441,16 @@ export default function ReviewDetailPage() {
       {claimedByOther && (
         <div className="bg-red-500/10 border-2 border-red-500/40 p-4 flex items-center justify-between">
           <div>
-            <p className="text-red-600 font-medium text-sm uppercase">Claimed by another reviewer</p>
+            <p className="text-red-400 font-medium text-sm uppercase">Claimed by another reviewer</p>
             {claimExpiry && (
-              <p className="text-red-600/80 text-xs mt-1">
+              <p className="text-red-400/80 text-xs mt-1">
                 Expires: {claimExpiry.toLocaleTimeString()}
               </p>
             )}
           </div>
           <button
             onClick={skipToNext}
-            className="px-3 py-1.5 text-xs uppercase border border-red-500 text-red-600 hover:bg-red-500/10 cursor-pointer"
+            className="px-3 py-1.5 text-xs uppercase border border-red-500 text-red-400 hover:bg-red-500/10 cursor-pointer"
           >
             Skip to Next
           </button>
@@ -468,9 +468,9 @@ export default function ReviewDetailPage() {
           </button>
           <div className="flex items-center gap-3 mb-2">
             <span className="text-3xl">⚠️</span>
-            <h2 className="text-red-600 text-lg uppercase tracking-wider font-bold">Fraud Alert</h2>
+            <h2 className="text-red-400 text-lg uppercase tracking-wider font-bold">Fraud Alert</h2>
           </div>
-          <p className="text-red-600/80 text-sm">
+          <p className="text-red-400/80 text-sm">
             This user has been flagged for fraud. Their account is suspended. Exercise extreme caution when reviewing this submission.
           </p>
         </div>
@@ -482,8 +482,8 @@ export default function ReviewDetailPage() {
             <div className="flex items-center gap-2">
               <span className="text-xl">🔴</span>
               <div>
-                <p className="text-red-600 font-medium text-sm uppercase">Hackatime Trust: Convicted</p>
-                <p className="text-red-600/80 text-xs mt-1">This user has been convicted on Hackatime for fraud. They should be marked as fraud on this platform too.</p>
+                <p className="text-red-400 font-medium text-sm uppercase">Hackatime Trust: Convicted</p>
+                <p className="text-red-400/80 text-xs mt-1">This user has been convicted on Hackatime for fraud. They should be marked as fraud on this platform too.</p>
               </div>
             </div>
             <button
@@ -502,13 +502,13 @@ export default function ReviewDetailPage() {
         <div className="flex items-center gap-2">
           <Link
             href="/admin/review"
-            className="px-3 py-1.5 text-xs uppercase tracking-wider border border-cream-400 text-brown-800 hover:border-orange-500 transition-colors"
+            className="px-3 py-1.5 text-xs uppercase tracking-wider border border-cream-500/20 text-cream-50 hover:border-orange-500 transition-colors"
           >
             Back to Queue
           </Link>
           <button
             onClick={skipToNext}
-            className="px-3 py-1.5 text-xs uppercase tracking-wider border border-cream-400 text-brown-800 hover:border-orange-500 transition-colors cursor-pointer"
+            className="px-3 py-1.5 text-xs uppercase tracking-wider border border-cream-500/20 text-cream-50 hover:border-orange-500 transition-colors cursor-pointer"
           >
             Skip
           </button>
@@ -528,8 +528,8 @@ export default function ReviewDetailPage() {
                 Move to {submission.stage === 'DESIGN' ? 'Build' : 'Design'} Queue
               </button>
               {moveConfirm && (
-                <div className="absolute right-0 top-full mt-1 bg-cream-100 border-2 border-orange-500 p-3 z-10 w-64">
-                  <p className="text-brown-800 text-xs mb-2">Move this submission to the {submission.stage === 'DESIGN' ? 'Build' : 'Design'} queue?</p>
+                <div className="absolute right-0 top-full mt-1 bg-brown-800 border-2 border-orange-500 p-3 z-10 w-64">
+                  <p className="text-cream-50 text-xs mb-2">Move this submission to the {submission.stage === 'DESIGN' ? 'Build' : 'Design'} queue?</p>
                   <div className="flex gap-2">
                     <button
                       onClick={handleMoveQueue}
@@ -539,7 +539,7 @@ export default function ReviewDetailPage() {
                     </button>
                     <button
                       onClick={() => setMoveConfirm(false)}
-                      className="px-2 py-1 text-xs border border-cream-400 text-brown-800 cursor-pointer"
+                      className="px-2 py-1 text-xs border border-cream-500/20 text-cream-50 cursor-pointer"
                     >
                       Cancel
                     </button>
@@ -552,27 +552,27 @@ export default function ReviewDetailPage() {
       </div>
 
       {/* ── Submission Overview Card ── */}
-      <div className="bg-cream-100 border-2 border-cream-400 overflow-hidden">
+      <div className="bg-brown-800 border border-cream-500/20 rounded overflow-hidden">
         {project.coverImage && (
-          <div className="w-full h-48 overflow-hidden border-b border-cream-400">
+          <div className="w-full h-48 overflow-hidden border-b border-cream-500/20">
             <img src={project.coverImage} alt="" className="w-full h-full object-cover" />
           </div>
         )}
         <div className="p-6">
           <div className="flex items-start justify-between gap-4 mb-4">
             <div>
-              <p className="text-cream-600 text-xs uppercase tracking-wider">{submission.id}</p>
-              <h1 className="text-brown-800 text-2xl uppercase tracking-wide">{project.title}</h1>
+              <p className="text-cream-200 text-xs uppercase tracking-wider">{submission.id}</p>
+              <h1 className="text-cream-50 text-2xl uppercase tracking-wide">{project.title}</h1>
             </div>
             <div className="flex gap-2 flex-shrink-0">
               <span className={`text-xs uppercase px-2 py-0.5 ${
-                submission.stage === 'DESIGN' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
+                submission.stage === 'DESIGN' ? 'bg-blue-500/20 text-blue-400' : 'bg-green-500/20 text-green-400'
               }`}>
                 {submission.stage}
               </span>
               {tierInfo && (
                 <span className={`text-xs px-2 py-0.5 ${
-                  { 1: 'bg-cream-300 text-cream-600', 2: 'bg-green-100 text-green-700', 3: 'bg-blue-100 text-blue-700', 4: 'bg-purple-100 text-purple-700', 5: 'bg-orange-100 text-orange-700' }[project.tier!] || ''
+                  { 1: 'bg-cream-500/20 text-cream-300', 2: 'bg-green-500/20 text-green-400', 3: 'bg-blue-500/20 text-blue-400', 4: 'bg-purple-500/20 text-purple-400', 5: 'bg-orange-500/20 text-orange-400' }[project.tier!] || ''
                 }`}>
                   {tierInfo.name} ({tierInfo.bits} bits)
                 </span>
@@ -586,18 +586,18 @@ export default function ReviewDetailPage() {
             )}
             <div>
               <div className="flex items-center gap-2">
-                <p className="text-brown-800 text-sm">{project.user.name || project.user.email}</p>
+                <p className="text-cream-50 text-sm">{project.user.name || project.user.email}</p>
                 {project.user.fraudConvicted ? (
                   <span className="text-xs px-2 py-0.5 bg-red-600 text-white uppercase">Fraud</span>
                 ) : hackatimeTrustLevel === 'red' ? (
-                  <span className="text-xs px-2 py-0.5 bg-red-100 text-red-700 border border-red-300 uppercase">Convicted</span>
+                  <span className="text-xs px-2 py-0.5 bg-red-500/20 text-red-400 border border-red-500/40 uppercase">Convicted</span>
                 ) : hackatimeTrustLevel === 'green' ? (
-                  <span className="text-xs px-2 py-0.5 bg-green-100 text-green-700 border border-green-300 uppercase">Trusted</span>
+                  <span className="text-xs px-2 py-0.5 bg-green-500/20 text-green-400 border border-green-500/40 uppercase">Trusted</span>
                 ) : (
-                  <span className="text-xs px-2 py-0.5 bg-cream-200 text-brown-800 border border-cream-400 uppercase">Unscored</span>
+                  <span className="text-xs px-2 py-0.5 bg-brown-900 text-cream-50 border border-cream-500/20 uppercase">Unscored</span>
                 )}
               </div>
-              <p className="text-cream-600 text-xs">
+              <p className="text-cream-200 text-xs">
                 Submitted {new Date(submission.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
               </p>
             </div>
@@ -605,35 +605,35 @@ export default function ReviewDetailPage() {
 
           <div className="grid grid-cols-3 sm:grid-cols-6 gap-4 mb-4 text-sm">
             <div>
-              <p className="text-cream-600 text-xs uppercase">Work Units</p>
-              <p className="text-brown-800">{project.totalWorkUnits}h</p>
+              <p className="text-cream-200 text-xs uppercase">Work Units</p>
+              <p className="text-cream-50">{project.totalWorkUnits}h</p>
             </div>
             <div>
-              <p className="text-cream-600 text-xs uppercase">Entries</p>
-              <p className="text-brown-800">{project.entryCount}</p>
+              <p className="text-cream-200 text-xs uppercase">Entries</p>
+              <p className="text-cream-50">{project.entryCount}</p>
             </div>
             <div>
-              <p className="text-cream-600 text-xs uppercase">BOM Cost</p>
-              <p className="text-brown-800">${project.bomCost.toFixed(2)}</p>
+              <p className="text-cream-200 text-xs uppercase">BOM Cost</p>
+              <p className="text-cream-50">${project.bomCost.toFixed(2)}</p>
             </div>
             <div>
-              <p className="text-cream-600 text-xs uppercase">BOM $/h</p>
-              <p className="text-brown-800">{project.costPerHour !== null ? `$${project.costPerHour.toFixed(2)}` : '—'}</p>
+              <p className="text-cream-200 text-xs uppercase">BOM $/h</p>
+              <p className="text-cream-50">{project.costPerHour !== null ? `$${project.costPerHour.toFixed(2)}` : '—'}</p>
             </div>
             <div>
-              <p className="text-cream-600 text-xs uppercase">Bits/h</p>
+              <p className="text-cream-200 text-xs uppercase">Bits/h</p>
               <p className="text-orange-500">{project.bitsPerHour !== null ? project.bitsPerHour : '—'}</p>
             </div>
             <div>
-              <p className="text-cream-600 text-xs uppercase">Funding</p>
-              <p className="text-brown-800">{tierInfo ? `${tierInfo.bits} bits` : 'No tier'}</p>
+              <p className="text-cream-200 text-xs uppercase">Funding</p>
+              <p className="text-cream-50">{tierInfo ? `${tierInfo.bits} bits` : 'No tier'}</p>
             </div>
           </div>
 
           {project.description && (
             <div className="mb-4">
-              <p className="text-cream-600 text-xs uppercase mb-1">Description</p>
-              <p className="text-brown-800 text-sm whitespace-pre-wrap">{project.description}</p>
+              <p className="text-cream-200 text-xs uppercase mb-1">Description</p>
+              <p className="text-cream-50 text-sm whitespace-pre-wrap">{project.description}</p>
             </div>
           )}
 
@@ -654,7 +654,7 @@ export default function ReviewDetailPage() {
           {project.tags.length > 0 && (
             <div className="flex gap-1 flex-wrap">
               {project.tags.map((tag) => (
-                <span key={tag} className="text-xs bg-cream-200 text-brown-800 px-2 py-0.5">{tag}</span>
+                <span key={tag} className="text-xs bg-brown-900 text-cream-50 px-2 py-0.5">{tag}</span>
               ))}
             </div>
           )}
@@ -662,20 +662,20 @@ export default function ReviewDetailPage() {
       </div>
 
       {/* ── GitHub Checks Card ── */}
-      <div className="bg-cream-100 border-2 border-cream-400 p-6">
-        <h2 className="text-brown-800 text-sm uppercase tracking-wider mb-4">GitHub Repo Checks</h2>
+      <div className="bg-brown-800 border border-cream-500/20 rounded p-6">
+        <h2 className="text-cream-50 text-sm uppercase tracking-wider mb-4">GitHub Repo Checks</h2>
         {ghChecksLoading ? (
-          <p className="text-cream-600 text-sm">Running checks...</p>
+          <p className="text-cream-200 text-sm">Running checks...</p>
         ) : ghChecks ? (
           <div className="space-y-2">
             {ghChecks.map((check) => (
               <div key={check.key} className="flex items-center gap-2 text-sm">
-                <span className={check.passed ? 'text-green-600' : 'text-red-600'}>
+                <span className={check.passed ? 'text-green-400' : 'text-red-400'}>
                   {check.passed ? '\u2713' : '\u2717'}
                 </span>
-                <span className="text-brown-800">{check.label}</span>
+                <span className="text-cream-50">{check.label}</span>
                 {check.detail && (
-                  <span className="text-cream-600 text-xs">({check.detail})</span>
+                  <span className="text-cream-200 text-xs">({check.detail})</span>
                 )}
               </div>
             ))}
@@ -696,20 +696,20 @@ export default function ReviewDetailPage() {
                   .catch((err) => setGhChecksError(String(err)))
                   .finally(() => setGhChecksLoading(false));
               }}
-              className="mt-2 text-xs text-cream-600 underline hover:text-brown-800"
+              className="mt-2 text-xs text-cream-200 underline hover:text-cream-50"
             >
               Retry checks
             </button>
           </div>
         ) : (
-          <p className="text-cream-600 text-sm">Could not load checks</p>
+          <p className="text-cream-200 text-sm">Could not load checks</p>
         )}
       </div>
 
       {/* ── Conflict Warning Card ── */}
       {conflicts.length > 0 && (
         <div className="bg-yellow-500/10 border-2 border-yellow-500/40 p-4">
-          <p className="text-yellow-700 font-medium text-sm uppercase mb-2">
+          <p className="text-yellow-400 font-medium text-sm uppercase mb-2">
             Conflict: Author has other active submissions
           </p>
           <ul className="space-y-1">
@@ -717,7 +717,7 @@ export default function ReviewDetailPage() {
               <li key={c.id}>
                 <Link
                   href={`/admin/review/${c.id}`}
-                  className="text-yellow-700/80 text-sm hover:underline"
+                  className="text-yellow-400/80 text-sm hover:underline"
                 >
                   {c.project.title}
                 </Link>
@@ -729,8 +729,8 @@ export default function ReviewDetailPage() {
 
       {/* ── Previous Reviews Card ── */}
       {submission.reviews.length > 0 && (
-        <div className="bg-cream-100 border-2 border-cream-400 p-6">
-          <h2 className="text-brown-800 text-sm uppercase tracking-wider mb-4">Previous Reviews</h2>
+        <div className="bg-brown-800 border border-cream-500/20 rounded p-6">
+          <h2 className="text-cream-50 text-sm uppercase tracking-wider mb-4">Previous Reviews</h2>
           <div className="space-y-4">
             {submission.reviews.map((review, idx) => {
               const isLatest = idx === 0 && !review.invalidated;
@@ -746,60 +746,60 @@ export default function ReviewDetailPage() {
 
       {/* ── Note from Submitter Card ── */}
       {submission.notes && (
-        <div className="bg-cream-100 border-2 border-cream-400 p-6">
-          <h2 className="text-brown-800 text-sm uppercase tracking-wider mb-2">Note from Submitter</h2>
-          <p className="text-brown-800 text-sm whitespace-pre-wrap">{submission.notes}</p>
+        <div className="bg-brown-800 border border-cream-500/20 rounded p-6">
+          <h2 className="text-cream-50 text-sm uppercase tracking-wider mb-2">Note from Submitter</h2>
+          <p className="text-cream-50 text-sm whitespace-pre-wrap">{submission.notes}</p>
         </div>
       )}
 
       {/* ── Work Log / Journal Card ── */}
-      <div className="bg-cream-100 border-2 border-cream-400 p-6">
-        <h2 className="text-brown-800 text-sm uppercase tracking-wider mb-4">Work Log</h2>
+      <div className="bg-brown-800 border border-cream-500/20 rounded p-6">
+        <h2 className="text-cream-50 text-sm uppercase tracking-wider mb-4">Work Log</h2>
 
         {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-4 text-sm">
           <div>
-            <p className="text-cream-600 text-xs uppercase">Entries</p>
-            <p className="text-brown-800 font-medium">{project.entryCount}</p>
+            <p className="text-cream-200 text-xs uppercase">Entries</p>
+            <p className="text-cream-50 font-medium">{project.entryCount}</p>
           </div>
           <div>
-            <p className="text-cream-600 text-xs uppercase">Journal</p>
-            <p className="text-brown-800 font-medium">{project.journalHours}h</p>
+            <p className="text-cream-200 text-xs uppercase">Journal</p>
+            <p className="text-cream-50 font-medium">{project.journalHours}h</p>
           </div>
           <div>
-            <p className="text-cream-600 text-xs uppercase">Average</p>
-            <p className="text-brown-800 font-medium">{project.avgWorkUnits}h</p>
+            <p className="text-cream-200 text-xs uppercase">Average</p>
+            <p className="text-cream-50 font-medium">{project.avgWorkUnits}h</p>
           </div>
           <div>
-            <p className="text-cream-600 text-xs uppercase">Max</p>
-            <p className="text-brown-800 font-medium">{project.maxWorkUnits}h</p>
+            <p className="text-cream-200 text-xs uppercase">Max</p>
+            <p className="text-cream-50 font-medium">{project.maxWorkUnits}h</p>
           </div>
           <div>
-            <p className="text-cream-600 text-xs uppercase">Min</p>
-            <p className="text-brown-800 font-medium">{project.minWorkUnits}h</p>
+            <p className="text-cream-200 text-xs uppercase">Min</p>
+            <p className="text-cream-50 font-medium">{project.minWorkUnits}h</p>
           </div>
         </div>
 
         {/* Firmware Time from Hackatime */}
         {project.hackatimeProjects.length > 0 && (
-          <div className="mb-4 bg-cream-200 border border-cream-300 p-3">
-            <p className="text-cream-600 text-xs uppercase mb-2">Firmware Time (Hackatime)</p>
+          <div className="mb-4 bg-brown-900 border border-cream-500/10 p-3">
+            <p className="text-cream-200 text-xs uppercase mb-2">Firmware Time (Hackatime)</p>
             <div className="space-y-1">
               {project.hackatimeProjects.map((hp) => (
                 <div key={hp.id} className="flex items-center justify-between text-sm">
-                  <span className="text-brown-800">{hp.hackatimeProject}</span>
-                  <span className="text-brown-800">
+                  <span className="text-cream-50">{hp.hackatimeProject}</span>
+                  <span className="text-cream-50">
                     {(hp.totalSeconds / 3600).toFixed(1)}h
                     {hp.hoursApproved !== null && (
-                      <span className="text-green-600 ml-2">({hp.hoursApproved}h approved)</span>
+                      <span className="text-green-400 ml-2">({hp.hoursApproved}h approved)</span>
                     )}
                   </span>
                 </div>
               ))}
             </div>
-            <p className="text-brown-800 text-sm mt-2">
+            <p className="text-cream-50 text-sm mt-2">
               Firmware total: <span className="font-medium">{project.firmwareHours}h</span>
-              <span className="text-cream-600 ml-2">(included in {project.totalWorkUnits}h total)</span>
+              <span className="text-cream-200 ml-2">(included in {project.totalWorkUnits}h total)</span>
             </p>
           </div>
         )}
@@ -818,7 +818,7 @@ export default function ReviewDetailPage() {
                     style={{ height: `${Math.max(heightPct, 4)}%` }}
                     title={`${session.title}: ${session.hoursClaimed}h`}
                   >
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 bg-brown-800 text-cream-100 text-xs px-2 py-1 hidden group-hover:block whitespace-nowrap z-10">
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 bg-cream-200 text-brown-900 text-xs px-2 py-1 hidden group-hover:block whitespace-nowrap z-10">
                       {session.hoursClaimed}h - {session.title}
                     </div>
                   </div>
@@ -831,7 +831,7 @@ export default function ReviewDetailPage() {
         {/* Collapsible full log */}
         <button
           onClick={() => setShowWorkLog(!showWorkLog)}
-          className="text-orange-500 text-xs uppercase tracking-wider hover:text-orange-600 cursor-pointer"
+          className="text-orange-500 text-xs uppercase tracking-wider hover:text-orange-400 cursor-pointer"
         >
           {showWorkLog ? 'Hide Full Log' : 'Show Full Log'}
         </button>
@@ -839,32 +839,32 @@ export default function ReviewDetailPage() {
         {showWorkLog && (
           <div className="mt-4 space-y-3">
             {project.workSessions.map((session) => (
-              <div key={session.id} className="border border-cream-300 p-3">
+              <div key={session.id} className="border border-cream-500/10 p-3">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-brown-800 text-sm font-medium">{session.title}</p>
-                    <p className="text-cream-600 text-xs">
+                    <p className="text-cream-50 text-sm font-medium">{session.title}</p>
+                    <p className="text-cream-200 text-xs">
                       {new Date(session.createdAt).toLocaleDateString()} | {session.hoursClaimed}h claimed
                       {session.hoursApproved !== null && ` | ${session.hoursApproved}h approved`}
                     </p>
                     {session.categories.length > 0 && (
                       <div className="flex gap-1 mt-1">
                         {session.categories.map((c) => (
-                          <span key={c} className="text-xs bg-cream-200 text-brown-800 px-1">{c}</span>
+                          <span key={c} className="text-xs bg-brown-900 text-cream-50 px-1">{c}</span>
                         ))}
                       </div>
                     )}
                   </div>
                 </div>
                 {session.content && (
-                  <p className="text-brown-800 text-xs mt-2 whitespace-pre-wrap">{session.content}</p>
+                  <p className="text-cream-50 text-xs mt-2 whitespace-pre-wrap">{session.content}</p>
                 )}
                 {session.media.length > 0 && (
                   <div className="flex gap-2 mt-2 flex-wrap">
                     {session.media.map((m) => (
                       <a key={m.id} href={m.url} target="_blank" rel="noopener noreferrer">
                         {m.type === 'IMAGE' ? (
-                          <img src={m.url} alt="" className="w-20 h-20 object-cover border border-cream-300" />
+                          <img src={m.url} alt="" className="w-20 h-20 object-cover border border-cream-500/10" />
                         ) : (
                           <span className="text-xs text-orange-500 underline">Video</span>
                         )}
@@ -879,23 +879,23 @@ export default function ReviewDetailPage() {
       </div>
 
       {/* ── Supporting Evidence Card ── */}
-      <div className="bg-cream-100 border-2 border-cream-400 p-6">
-        <h2 className="text-brown-800 text-sm uppercase tracking-wider mb-4">Supporting Evidence</h2>
+      <div className="bg-brown-800 border border-cream-500/20 rounded p-6">
+        <h2 className="text-cream-50 text-sm uppercase tracking-wider mb-4">Supporting Evidence</h2>
         <div className="flex gap-6 text-sm mb-3">
-          <p className="text-brown-800">
+          <p className="text-cream-50">
             BOM Cost: <span className="font-medium">${project.bomCost.toFixed(2)}</span>
             {((project.bomTax ?? 0) > 0 || (project.bomShipping ?? 0) > 0) && (
-              <span className="text-cream-600 text-xs ml-1">
+              <span className="text-cream-200 text-xs ml-1">
                 ({(project.bomTax ?? 0) > 0 && `$${(project.bomTax ?? 0).toFixed(2)} tax`}
                 {(project.bomTax ?? 0) > 0 && (project.bomShipping ?? 0) > 0 && ' + '}
                 {(project.bomShipping ?? 0) > 0 && `$${(project.bomShipping ?? 0).toFixed(2)} shipping`})
               </span>
             )}
           </p>
-          <p className="text-brown-800">
+          <p className="text-cream-50">
             $/h: <span className="font-medium">{project.costPerHour !== null ? `$${project.costPerHour.toFixed(2)}` : '—'}</span>
           </p>
-          <p className="text-brown-800">
+          <p className="text-cream-50">
             Bits/h: <span className="font-medium text-orange-500">{project.bitsPerHour !== null ? project.bitsPerHour : '—'}</span>
           </p>
         </div>
@@ -903,34 +903,34 @@ export default function ReviewDetailPage() {
         {/* BOM Items */}
         {project.bomItems.length > 0 && (
           <div className="mb-4">
-            <p className="text-cream-600 text-xs uppercase mb-2">Bill of Materials</p>
+            <p className="text-cream-200 text-xs uppercase mb-2">Bill of Materials</p>
             <div className="space-y-1">
               {project.bomItems.map((item) => (
-                <div key={item.id} className="flex items-center justify-between text-sm border-b border-cream-300 py-1">
+                <div key={item.id} className="flex items-center justify-between text-sm border-b border-cream-500/10 py-1">
                   <div>
-                    <span className="text-brown-800">{item.name}</span>
-                    {item.purpose && <span className="text-cream-600 text-xs ml-2">({item.purpose})</span>}
+                    <span className="text-cream-50">{item.name}</span>
+                    {item.purpose && <span className="text-cream-200 text-xs ml-2">({item.purpose})</span>}
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-brown-800">${bomItemTotal(item).toFixed(2)}</span>
+                    <span className="text-cream-50">${bomItemTotal(item).toFixed(2)}</span>
                     <span className={`text-xs px-1 ${
-                      item.status === 'approved' ? 'bg-green-100 text-green-700' :
-                      item.status === 'rejected' ? 'bg-red-100 text-red-700' :
-                      'bg-yellow-100 text-yellow-700'
+                      item.status === 'approved' ? 'bg-green-500/20 text-green-400' :
+                      item.status === 'rejected' ? 'bg-red-500/20 text-red-400' :
+                      'bg-yellow-500/20 text-yellow-400'
                     }`}>{item.status}</span>
                   </div>
                 </div>
               ))}
               {(project.bomTax ?? 0) > 0 && (
-                <div className="flex items-center justify-between text-sm border-b border-cream-300 py-1">
-                  <span className="text-cream-600">Tax</span>
-                  <span className="text-brown-800">${(project.bomTax ?? 0).toFixed(2)}</span>
+                <div className="flex items-center justify-between text-sm border-b border-cream-500/10 py-1">
+                  <span className="text-cream-200">Tax</span>
+                  <span className="text-cream-50">${(project.bomTax ?? 0).toFixed(2)}</span>
                 </div>
               )}
               {(project.bomShipping ?? 0) > 0 && (
-                <div className="flex items-center justify-between text-sm border-b border-cream-300 py-1">
-                  <span className="text-cream-600">Shipping</span>
-                  <span className="text-brown-800">${(project.bomShipping ?? 0).toFixed(2)}</span>
+                <div className="flex items-center justify-between text-sm border-b border-cream-500/10 py-1">
+                  <span className="text-cream-200">Shipping</span>
+                  <span className="text-cream-50">${(project.bomShipping ?? 0).toFixed(2)}</span>
                 </div>
               )}
             </div>
@@ -942,23 +942,23 @@ export default function ReviewDetailPage() {
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {project.cartScreenshots.map((url, i) => (
               <a key={i} href={url} target="_blank" rel="noopener noreferrer">
-                <img src={url} alt={`Cart screenshot ${i + 1}`} className="w-full h-32 object-cover border border-cream-300" />
+                <img src={url} alt={`Cart screenshot ${i + 1}`} className="w-full h-32 object-cover border border-cream-500/10" />
               </a>
             ))}
           </div>
         ) : (
-          <p className="text-cream-600 text-sm">No screenshots uploaded</p>
+          <p className="text-cream-200 text-sm">No screenshots uploaded</p>
         )}
 
         {/* Session media gallery */}
         {project.workSessions.some((s) => s.media.length > 0) && (
           <div className="mt-4">
-            <p className="text-cream-600 text-xs uppercase mb-2">Session Media</p>
+            <p className="text-cream-200 text-xs uppercase mb-2">Session Media</p>
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
               {project.workSessions.flatMap((s) =>
                 s.media.filter((m) => m.type === 'IMAGE').map((m) => (
                   <a key={m.id} href={m.url} target="_blank" rel="noopener noreferrer">
-                    <img src={m.url} alt="" className="w-full h-24 object-cover border border-cream-300" />
+                    <img src={m.url} alt="" className="w-full h-24 object-cover border border-cream-500/10" />
                   </a>
                 ))
               )}
@@ -968,45 +968,45 @@ export default function ReviewDetailPage() {
       </div>
 
       {/* ── Internal Notes Card ── */}
-      <div className="bg-cream-100 border-2 border-cream-400 p-6">
-        <h2 className="text-brown-800 text-sm uppercase tracking-wider mb-2">
-          Internal Notes <span className="text-cream-600 normal-case">(about this author, shared across reviewers)</span>
+      <div className="bg-brown-800 border border-cream-500/20 rounded p-6">
+        <h2 className="text-cream-50 text-sm uppercase tracking-wider mb-2">
+          Internal Notes <span className="text-cream-200 normal-case">(about this author, shared across reviewers)</span>
         </h2>
         <textarea
           value={internalNote}
           onChange={(e) => handleNoteChange(e.target.value)}
-          className="w-full h-24 px-3 py-2 text-sm border border-cream-400 bg-cream-50 text-brown-800 focus:outline-none focus:border-orange-500 resize-y"
+          className="w-full h-24 px-3 py-2 text-sm border border-cream-500/20 bg-brown-900 text-cream-50 focus:outline-none focus:border-orange-500 resize-y"
           placeholder="Add notes about this author..."
         />
-        <p className="text-cream-600 text-xs mt-1">Auto-saved</p>
+        <p className="text-cream-200 text-xs mt-1">Auto-saved</p>
       </div>
 
       {/* ── Submit Review Card ── */}
-      <div className={`bg-cream-100 border-2 ${claimedByOther ? 'border-cream-400 opacity-60' : 'border-orange-500'} p-6`}>
-        <h2 className="text-brown-800 text-sm uppercase tracking-wider mb-4">Submit Review</h2>
+      <div className={`bg-brown-800 border-2 ${claimedByOther ? 'border-cream-500/20 opacity-60' : 'border-orange-500'} p-6`}>
+        <h2 className="text-cream-50 text-sm uppercase tracking-wider mb-4">Submit Review</h2>
 
         {claimedByOther ? (
-          <p className="text-cream-600 text-sm">This submission is claimed by another reviewer. You cannot submit a review.</p>
+          <p className="text-cream-200 text-sm">This submission is claimed by another reviewer. You cannot submit a review.</p>
         ) : (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
-                <label className="text-cream-600 text-xs uppercase block mb-1">Work Units Override</label>
+                <label className="text-cream-200 text-xs uppercase block mb-1">Work Units Override</label>
                 <input
                   type="number"
                   step="0.1"
                   value={workUnitsOverride}
                   onChange={(e) => setWorkUnitsOverride(e.target.value)}
                   placeholder={`Current: ${project.totalWorkUnits}h`}
-                  className="w-full px-3 py-1.5 text-sm border border-cream-400 bg-cream-50 text-brown-800 focus:outline-none focus:border-orange-500"
+                  className="w-full px-3 py-1.5 text-sm border border-cream-500/20 bg-brown-900 text-cream-50 focus:outline-none focus:border-orange-500"
                 />
               </div>
               <div>
-                <label className="text-cream-600 text-xs uppercase block mb-1">Tier Override</label>
+                <label className="text-cream-200 text-xs uppercase block mb-1">Tier Override</label>
                 <select
                   value={tierOverride}
                   onChange={(e) => setTierOverride(e.target.value)}
-                  className="w-full px-3 py-1.5 text-sm border border-cream-400 bg-cream-50 text-brown-800 focus:outline-none focus:border-orange-500"
+                  className="w-full px-3 py-1.5 text-sm border border-cream-500/20 bg-brown-900 text-cream-50 focus:outline-none focus:border-orange-500"
                 >
                   <option value="">Current: {tierInfo?.name || 'None'}</option>
                   {TIERS.map((t) => (
@@ -1015,25 +1015,25 @@ export default function ReviewDetailPage() {
                 </select>
               </div>
               <div>
-                <label className="text-cream-600 text-xs uppercase block mb-1">Grant Override ($USD)</label>
+                <label className="text-cream-200 text-xs uppercase block mb-1">Grant Override ($USD)</label>
                 <input
                   type="number"
                   value={grantOverride}
                   onChange={(e) => setGrantOverride(e.target.value)}
                   placeholder={`Default: BOM cost ($${project.bomCost.toFixed(2)})`}
-                  className="w-full px-3 py-1.5 text-sm border border-cream-400 bg-cream-50 text-brown-800 focus:outline-none focus:border-orange-500"
+                  className="w-full px-3 py-1.5 text-sm border border-cream-500/20 bg-brown-900 text-cream-50 focus:outline-none focus:border-orange-500"
                 />
                 {grantOverride && (
-                  <p className="text-cream-600 text-xs mt-1">{grantOverride} bits = ${grantOverride} value</p>
+                  <p className="text-cream-200 text-xs mt-1">{grantOverride} bits = ${grantOverride} value</p>
                 )}
               </div>
               {isAdmin && (
                 <div>
-                  <label className="text-cream-600 text-xs uppercase block mb-1">Category Override (Admin)</label>
+                  <label className="text-cream-200 text-xs uppercase block mb-1">Category Override (Admin)</label>
                   <select
                     value={categoryOverride}
                     onChange={(e) => setCategoryOverride(e.target.value)}
-                    className="w-full px-3 py-1.5 text-sm border border-cream-400 bg-cream-50 text-brown-800 focus:outline-none focus:border-orange-500"
+                    className="w-full px-3 py-1.5 text-sm border border-cream-500/20 bg-brown-900 text-cream-50 focus:outline-none focus:border-orange-500"
                   >
                     <option value="">No change</option>
                     <option value="DESIGN">Design</option>
@@ -1044,7 +1044,7 @@ export default function ReviewDetailPage() {
             </div>
 
             <div className="mb-4">
-              <label className="text-cream-600 text-xs uppercase block mb-1">Internal Justification</label>
+              <label className="text-cream-200 text-xs uppercase block mb-1">Internal Justification</label>
               {isAdmin && (
                 <div className="flex flex-wrap gap-1.5 mb-2">
                   {JUSTIFICATION_SHORTCUTS.map((s, i) => (
@@ -1052,8 +1052,8 @@ export default function ReviewDetailPage() {
                       key={i}
                       className={`flex items-center gap-1.5 px-2.5 py-1 text-xs border cursor-pointer transition-colors select-none ${
                         checkedJustifications.has(i)
-                          ? 'bg-green-100 border-green-600 text-green-700'
-                          : 'border-cream-400 text-brown-800 hover:border-green-600/60 hover:bg-green-100'
+                          ? 'bg-green-500/15 border-green-500 text-green-400'
+                          : 'border-cream-500/20 text-cream-50 hover:border-green-500/60 hover:bg-green-500/15'
                       }`}
                     >
                       <input
@@ -1070,13 +1070,13 @@ export default function ReviewDetailPage() {
               <textarea
                 value={reason}
                 onChange={(e) => { setReason(e.target.value); setCheckedJustifications(new Set()); }}
-                className="w-full h-20 px-3 py-2 text-sm border border-cream-400 bg-cream-50 text-brown-800 focus:outline-none focus:border-orange-500 resize-y"
+                className="w-full h-20 px-3 py-2 text-sm border border-cream-500/20 bg-brown-900 text-cream-50 focus:outline-none focus:border-orange-500 resize-y"
                 placeholder="Internal reason for your decision (not shown to submitter)..."
               />
             </div>
 
             <div className="mb-4">
-              <label className="text-cream-600 text-xs uppercase block mb-1">Feedback for Submitter</label>
+              <label className="text-cream-200 text-xs uppercase block mb-1">Feedback for Submitter</label>
               {isAdmin && (
                 <div className="flex flex-wrap gap-1.5 mb-2">
                   {FEEDBACK_SHORTCUTS.map((s, i) => (
@@ -1084,8 +1084,8 @@ export default function ReviewDetailPage() {
                       key={i}
                       className={`flex items-center gap-1.5 px-2.5 py-1 text-xs border cursor-pointer transition-colors select-none ${
                         checkedFeedback.has(i)
-                          ? 'bg-yellow-100 border-yellow-600 text-yellow-700'
-                          : 'border-cream-400 text-brown-800 hover:border-yellow-600/60 hover:bg-yellow-100'
+                          ? 'bg-yellow-500/15 border-yellow-500 text-yellow-400'
+                          : 'border-cream-500/20 text-cream-50 hover:border-yellow-500/60 hover:bg-yellow-500/15'
                       }`}
                     >
                       <input
@@ -1102,14 +1102,14 @@ export default function ReviewDetailPage() {
               <textarea
                 value={feedback}
                 onChange={(e) => { setFeedback(e.target.value); setCheckedFeedback(new Set()); }}
-                className="w-full h-24 px-3 py-2 text-sm border border-cream-400 bg-cream-50 text-brown-800 focus:outline-none focus:border-orange-500 resize-y"
+                className="w-full h-24 px-3 py-2 text-sm border border-cream-500/20 bg-brown-900 text-cream-50 focus:outline-none focus:border-orange-500 resize-y"
                 placeholder="Feedback visible to the submitter (defaults to 'Awesome project!' if blank)..."
               />
             </div>
 
             {project.user.fraudConvicted && (
               <div className="mb-3 bg-red-500/10 border border-red-500/40 p-3">
-                <p className="text-red-600 text-xs uppercase">Fraud-convicted user — only rejection is allowed</p>
+                <p className="text-red-400 text-xs uppercase">Fraud-convicted user — only rejection is allowed</p>
               </div>
             )}
 
@@ -1122,56 +1122,56 @@ export default function ReviewDetailPage() {
                 <div>
                   <div className="mb-4 bg-orange-500/10 border border-orange-500/40 p-4">
                     <div className="flex items-center justify-between mb-3">
-                      <p className="text-orange-600 text-xs uppercase font-medium">
+                      <p className="text-orange-400 text-xs uppercase font-medium">
                         First-pass review by {firstPassReview.reviewerName || 'Reviewer'}
                       </p>
-                      <span className="text-cream-600 text-xs">
+                      <span className="text-cream-200 text-xs">
                         {new Date(firstPassReview.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3 bg-cream-200 p-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3 bg-brown-900 p-3">
                       <div>
-                        <p className="text-cream-600 text-xs uppercase">Hours</p>
-                        <p className="text-brown-800 text-sm font-medium">
+                        <p className="text-cream-200 text-xs uppercase">Hours</p>
+                        <p className="text-cream-50 text-sm font-medium">
                           {firstPassReview.workUnitsOverride !== null ? (
-                            <><span className="text-orange-600">{firstPassReview.workUnitsOverride}h</span> / {project.totalWorkUnits}h</>
+                            <><span className="text-orange-400">{firstPassReview.workUnitsOverride}h</span> / {project.totalWorkUnits}h</>
                           ) : (
                             <>{project.totalWorkUnits}h</>
                           )}
                         </p>
                       </div>
                       <div>
-                        <p className="text-cream-600 text-xs uppercase">Tier</p>
-                        <p className="text-brown-800 text-sm font-medium">
+                        <p className="text-cream-200 text-xs uppercase">Tier</p>
+                        <p className="text-cream-50 text-sm font-medium">
                           {fpTierInfo ? `${fpTierInfo.name} (${fpTierInfo.bits} bits)` : 'None'}
-                          {firstPassReview.tierOverride !== null && <span className="text-orange-600 text-xs ml-1">(override)</span>}
+                          {firstPassReview.tierOverride !== null && <span className="text-orange-400 text-xs ml-1">(override)</span>}
                         </p>
                       </div>
                       <div>
-                        <p className="text-cream-600 text-xs uppercase">Grant</p>
-                        <p className="text-brown-800 text-sm font-medium">
+                        <p className="text-cream-200 text-xs uppercase">Grant</p>
+                        <p className="text-cream-50 text-sm font-medium">
                           ${fpGrant.toFixed(2)}
-                          {firstPassReview.grantOverride !== null && <span className="text-orange-600 text-xs ml-1">(override)</span>}
+                          {firstPassReview.grantOverride !== null && <span className="text-orange-400 text-xs ml-1">(override)</span>}
                         </p>
                       </div>
                       <div>
-                        <p className="text-cream-600 text-xs uppercase">Result</p>
-                        <p className="text-green-600 text-sm font-medium uppercase">{firstPassReview.result}</p>
+                        <p className="text-cream-200 text-xs uppercase">Result</p>
+                        <p className="text-green-400 text-sm font-medium uppercase">{firstPassReview.result}</p>
                       </div>
                     </div>
 
                     {firstPassReview.feedback && (
                       <div className="mb-3">
-                        <p className="text-cream-600 text-xs uppercase">Feedback for submitter</p>
-                        <p className="text-brown-800 text-sm whitespace-pre-wrap">{firstPassReview.feedback}</p>
+                        <p className="text-cream-200 text-xs uppercase">Feedback for submitter</p>
+                        <p className="text-cream-50 text-sm whitespace-pre-wrap">{firstPassReview.feedback}</p>
                       </div>
                     )}
 
                     {firstPassReview.reason && (
                       <div>
-                        <p className="text-cream-600 text-xs uppercase">Internal justification</p>
-                        <p className="text-brown-800 text-sm whitespace-pre-wrap">{firstPassReview.reason}</p>
+                        <p className="text-cream-200 text-xs uppercase">Internal justification</p>
+                        <p className="text-cream-50 text-sm whitespace-pre-wrap">{firstPassReview.reason}</p>
                       </div>
                     )}
                   </div>
@@ -1209,7 +1209,7 @@ export default function ReviewDetailPage() {
                     <button
                       onClick={skipToNext}
                       disabled={submitting}
-                      className="px-4 py-2 text-sm uppercase tracking-wider border border-cream-400 text-brown-800 hover:border-orange-500 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+                      className="px-4 py-2 text-sm uppercase tracking-wider border border-cream-500/20 text-cream-50 hover:border-orange-500 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
                     >
                       Skip
                     </button>
@@ -1220,7 +1220,7 @@ export default function ReviewDetailPage() {
               <>
                 {!isAdmin && (
                   <div className="mb-3 bg-blue-500/10 border border-blue-500/40 p-3">
-                    <p className="text-blue-700 text-xs">Your approval will be recorded as a first-pass review. An admin will do the final approval, which triggers Airtable sync and bit grants.</p>
+                    <p className="text-blue-400 text-xs">Your approval will be recorded as a first-pass review. An admin will do the final approval, which triggers Airtable sync and bit grants.</p>
                   </div>
                 )}
 
@@ -1252,7 +1252,7 @@ export default function ReviewDetailPage() {
                   <button
                     onClick={skipToNext}
                     disabled={submitting}
-                    className="px-4 py-2 text-sm uppercase tracking-wider border border-cream-400 text-brown-800 hover:border-orange-500 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+                    className="px-4 py-2 text-sm uppercase tracking-wider border border-cream-500/20 text-cream-50 hover:border-orange-500 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
                   >
                     Skip
                   </button>
@@ -1275,89 +1275,89 @@ function ReviewCard({ review, defaultExpanded }: {
   const [expanded, setExpanded] = useState(defaultExpanded);
 
   const resultColor = {
-    APPROVED: 'text-green-700 bg-green-100 border-green-300',
-    RETURNED: 'text-yellow-700 bg-yellow-100 border-yellow-300',
-    REJECTED: 'text-red-700 bg-red-100 border-red-300',
+    APPROVED: 'text-green-400 bg-green-500/15 border-green-500/40',
+    RETURNED: 'text-yellow-400 bg-yellow-500/15 border-yellow-500/40',
+    REJECTED: 'text-red-400 bg-red-100 border-red-500/40',
   }[review.result] || '';
 
   const frozenTierInfo = review.frozenTier ? getTierById(review.frozenTier) : null;
 
   return (
-    <div className={`border ${review.invalidated ? 'border-cream-300 opacity-60' : 'border-cream-400'} p-3`}>
+    <div className={`border ${review.invalidated ? 'border-cream-500/10 opacity-60' : 'border-cream-500/20'} p-3`}>
       <div
         className="flex items-center justify-between cursor-pointer"
         onClick={() => setExpanded(!expanded)}
       >
         <div className="flex items-center gap-2 flex-wrap">
           {review.invalidated && (
-            <span className="text-xs px-1 bg-cream-300 text-cream-500 uppercase">Outdated</span>
+            <span className="text-xs px-1 bg-cream-500/20 text-cream-200 uppercase">Outdated</span>
           )}
           {review.isAdminReview && (
-            <span className="text-xs px-1 bg-purple-100 text-purple-700 uppercase">Admin</span>
+            <span className="text-xs px-1 bg-purple-500/20 text-purple-400 uppercase">Admin</span>
           )}
           <span className={`text-xs px-2 py-0.5 border ${resultColor}`}>
             {review.result}
           </span>
           {review.reviewerName && (
-            <span className="text-brown-800 text-xs font-medium">by {review.reviewerName}</span>
+            <span className="text-cream-50 text-xs font-medium">by {review.reviewerName}</span>
           )}
-          <span className="text-cream-600 text-xs">
+          <span className="text-cream-200 text-xs">
             {new Date(review.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
           </span>
         </div>
-        <span className="text-cream-600 text-xs">{expanded ? 'collapse' : 'expand'}</span>
+        <span className="text-cream-200 text-xs">{expanded ? 'collapse' : 'expand'}</span>
       </div>
 
       {expanded && (
         <div className="mt-3 space-y-2 text-sm">
           {/* Overrides */}
           {(review.workUnitsOverride || review.tierOverride || review.grantOverride || review.categoryOverride) && (
-            <div className="bg-cream-200 p-2">
-              <p className="text-cream-600 text-xs uppercase mb-1">Overrides Applied</p>
-              {review.workUnitsOverride !== null && <p className="text-brown-800 text-xs">Work Units: {review.workUnitsOverride}h</p>}
-              {review.tierOverride !== null && <p className="text-brown-800 text-xs">Tier: {review.tierOverride}</p>}
-              {review.grantOverride !== null && <p className="text-brown-800 text-xs">Grant: {review.grantOverride} bits</p>}
-              {review.categoryOverride && <p className="text-brown-800 text-xs">Category: {review.categoryOverride}</p>}
+            <div className="bg-brown-900 p-2">
+              <p className="text-cream-200 text-xs uppercase mb-1">Overrides Applied</p>
+              {review.workUnitsOverride !== null && <p className="text-cream-50 text-xs">Work Units: {review.workUnitsOverride}h</p>}
+              {review.tierOverride !== null && <p className="text-cream-50 text-xs">Tier: {review.tierOverride}</p>}
+              {review.grantOverride !== null && <p className="text-cream-50 text-xs">Grant: {review.grantOverride} bits</p>}
+              {review.categoryOverride && <p className="text-cream-50 text-xs">Category: {review.categoryOverride}</p>}
             </div>
           )}
 
           {/* Feedback */}
           {review.feedback && (
             <div>
-              <p className="text-cream-600 text-xs uppercase">Feedback (shown to submitter)</p>
-              <p className="text-brown-800 whitespace-pre-wrap">{review.feedback}</p>
+              <p className="text-cream-200 text-xs uppercase">Feedback (shown to submitter)</p>
+              <p className="text-cream-50 whitespace-pre-wrap">{review.feedback}</p>
             </div>
           )}
 
           {/* Internal reason */}
           {review.reason && (
             <div>
-              <p className="text-cream-600 text-xs uppercase">Internal Justification</p>
-              <p className="text-brown-800 whitespace-pre-wrap">{review.reason}</p>
+              <p className="text-cream-200 text-xs uppercase">Internal Justification</p>
+              <p className="text-cream-50 whitespace-pre-wrap">{review.reason}</p>
             </div>
           )}
 
           {/* Frozen snapshot */}
-          <div className="bg-cream-200 p-2">
-            <p className="text-cream-600 text-xs uppercase mb-1">Snapshot at Review Time</p>
+          <div className="bg-brown-900 p-2">
+            <p className="text-cream-200 text-xs uppercase mb-1">Snapshot at Review Time</p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
               {review.frozenWorkUnits !== null && (
-                <div><span className="text-cream-600">Work Units:</span> <span className="text-brown-800">{review.frozenWorkUnits}h</span></div>
+                <div><span className="text-cream-200">Work Units:</span> <span className="text-cream-50">{review.frozenWorkUnits}h</span></div>
               )}
               {review.frozenEntryCount !== null && (
-                <div><span className="text-cream-600">Entries:</span> <span className="text-brown-800">{review.frozenEntryCount}</span></div>
+                <div><span className="text-cream-200">Entries:</span> <span className="text-cream-50">{review.frozenEntryCount}</span></div>
               )}
               {review.frozenFundingAmount !== null && (
-                <div><span className="text-cream-600">Funding:</span> <span className="text-brown-800">${(review.frozenFundingAmount / 100).toFixed(2)}</span></div>
+                <div><span className="text-cream-200">Funding:</span> <span className="text-cream-50">${(review.frozenFundingAmount / 100).toFixed(2)}</span></div>
               )}
               {frozenTierInfo && (
-                <div><span className="text-cream-600">Tier:</span> <span className="text-brown-800">{frozenTierInfo.name}</span></div>
+                <div><span className="text-cream-200">Tier:</span> <span className="text-cream-50">{frozenTierInfo.name}</span></div>
               )}
             </div>
             {review.frozenReviewerNote && (
               <div className="mt-1">
-                <span className="text-cream-600 text-xs">Note to reviewer:</span>
-                <p className="text-brown-800 text-xs">{review.frozenReviewerNote}</p>
+                <span className="text-cream-200 text-xs">Note to reviewer:</span>
+                <p className="text-cream-50 text-xs">{review.frozenReviewerNote}</p>
               </div>
             )}
           </div>
