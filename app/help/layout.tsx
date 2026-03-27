@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
-import { NoiseOverlay } from '../components/NoiseOverlay';
+import { PlatformNoiseOverlay } from '../components/PlatformNoiseOverlay';
 
 export const metadata: Metadata = {
   title: 'Help & Guides - Stasis',
@@ -28,7 +28,7 @@ export default function HelpLayout({
       <main className="max-w-7xl mx-auto px-4 py-8">
         {children}
       </main>
-      <NoiseOverlay />
+      <PlatformNoiseOverlay />
     </div>
   );
 }

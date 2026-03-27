@@ -3,7 +3,7 @@
 import { useSession, signOut } from "@/lib/auth-client";
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect } from 'react';
-
+import { PlatformNoiseOverlay } from '@/app/components/PlatformNoiseOverlay';
 import Link from 'next/link';
 import { useRoles, Permission } from '@/lib/hooks/useRoles';
 
@@ -50,6 +50,7 @@ export default function AdminLayout({
   }
 
   return (
+    <>
       <div className="min-h-screen bg-cream-200 font-mono">
         {/* Header */}
         <div className="px-6 py-4 flex items-center justify-between border-b border-cream-400">
@@ -162,5 +163,8 @@ export default function AdminLayout({
           {children}
         </div>
       </div>
+
+      <PlatformNoiseOverlay />
+    </>
   );
 }

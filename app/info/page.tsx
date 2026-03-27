@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import GuidesContent from '../components/GuidesContent';
-import { NoiseOverlay } from '../components/NoiseOverlay';
+import { PlatformNoiseOverlay } from '../components/PlatformNoiseOverlay';
 
 export default function PublicGuidesPage() {
   return (
@@ -19,7 +19,7 @@ export default function PublicGuidesPage() {
       <main className="max-w-5xl mx-auto px-4 py-8">
         <GuidesContent />
       </main>
-      <NoiseOverlay />
+      <PlatformNoiseOverlay />
     </div>
   );
 }

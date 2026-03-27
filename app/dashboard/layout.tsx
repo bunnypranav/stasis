@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useSession, signIn, signOut } from "@/lib/auth-client";
-import { NoiseOverlay } from '../components/NoiseOverlay';
+import { PlatformNoiseOverlay } from '../components/PlatformNoiseOverlay';
 import { UserMenu } from '../components/UserMenu';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -136,7 +136,7 @@ export default function DashboardLayout({
             </div>
           </div>
         </div>
-        <NoiseOverlay />
+        <PlatformNoiseOverlay />
       </>
     );
   }
@@ -244,7 +244,7 @@ export default function DashboardLayout({
         </div>
       </div>
 
-      <NoiseOverlay />
+      <PlatformNoiseOverlay />
     </>
   );
 }

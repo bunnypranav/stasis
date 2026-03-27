@@ -3,7 +3,7 @@
 import { useSession, signOut } from "@/lib/auth-client";
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { NoiseOverlay } from '@/app/components/NoiseOverlay';
+import { PlatformNoiseOverlay } from '@/app/components/PlatformNoiseOverlay';
 import Link from 'next/link';
 import { useRoles } from '@/lib/hooks/useRoles';
 
@@ -92,7 +92,7 @@ export default function ReviewsLayout({
         </div>
       </div>
 
-      <NoiseOverlay />
+      <PlatformNoiseOverlay />
     </>
   );
 }

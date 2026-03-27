@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { gsap } from 'gsap';
 import { MagneticCorners } from '../components/MagneticCorners';
-import { NoiseOverlay } from '../components/NoiseOverlay';
+import { PlatformNoiseOverlay } from '../components/PlatformNoiseOverlay';
 import { PlaceholderProjectPreview } from '../components/starter-projects/PlaceholderProjectPreview';
 import { ProjectPreview } from '../components/starter-projects/ProjectPreview';
 import { ProjectGridHoverCorners } from '../components/starter-projects/ProjectGridHoverCorners';
@@ -503,7 +503,7 @@ export default function StarterProjectsPage() {
         <div className="absolute bottom-0 left-0 w-full h-48 bg-[linear-gradient(var(--color-brown-800 / 0%),var(--color-brown-800))] -z-2" />
       </div>
 
-      <NoiseOverlay />
+      <PlatformNoiseOverlay />
     </>
   );
 }

@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { MDXComponents } from 'mdx/types';
 import Parents from '../dashboard/help/content/parents.mdx';
-import { NoiseOverlay } from '../components/NoiseOverlay';
+import { PlatformNoiseOverlay } from '../components/PlatformNoiseOverlay';
 
 const mdxComponents: MDXComponents = {
   h2: ({ children }) => (
@@ -60,7 +60,7 @@ export default function ParentsPage() {
           </div>
         </div>
       </main>
-      <NoiseOverlay />
+      <PlatformNoiseOverlay />
     </div>
   );
 }
