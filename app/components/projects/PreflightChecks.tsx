@@ -13,7 +13,6 @@ interface Props {
   loading: boolean;
   error: string | null;
   onRetry: () => void;
-  onTagAdd?: (tag: 'PCB' | 'CAD') => void;
 }
 
 const statusOrder: Record<string, number> = { fail: 0, warn: 1, info: 2, pass: 3 };
@@ -64,7 +63,7 @@ function StatusIcon({ status }: { status: PreflightCheck['status'] }) {
   }
 }
 
-export default function PreflightChecks({ checks, loading, error, onRetry, onTagAdd }: Props) {
+export default function PreflightChecks({ checks, loading, error, onRetry }: Props) {
   if (loading) {
     return (
       <div className="flex items-center gap-3 py-4">
@@ -92,13 +91,6 @@ export default function PreflightChecks({ checks, loading, error, onRetry, onTag
 
   const sorted = [...checks].sort((a, b) => (statusOrder[a.status] ?? 3) - (statusOrder[b.status] ?? 3));
   const hasBlockingErrors = checks.some((c) => c.status === 'fail' && c.blocking);
-  const hasWarnings = checks.some((c) => c.status === 'warn');
-  const hasNonBlockingErrors = checks.some((c) => c.status === 'fail' && !c.blocking);
-
-  const tagKey = (check: PreflightCheck) =>
-    check.key === 'suggest_pcb_tag' ? 'PCB' as const
-    : check.key === 'suggest_cad_tag' ? 'CAD' as const
-    : null;
 
   return (
     <div className="py-3">
@@ -106,38 +98,20 @@ export default function PreflightChecks({ checks, loading, error, onRetry, onTag
       {hasBlockingErrors && (
         <p className="text-red-500 text-xs mb-2">Fix errors below before submitting.</p>
       )}
-      {!hasBlockingErrors && (hasWarnings || hasNonBlockingErrors) && (
-        <p className="text-yellow-700 text-xs mb-2">Warnings found - you can still submit, but consider fixing these.</p>
-      )}
       <ul className="space-y-2">
-        {sorted.map((check) => {
-          const suggestedTag = tagKey(check);
-          return (
-            <li key={check.key} className="flex items-start gap-2">
-              <StatusIcon status={check.status} />
-              <div className="min-w-0 flex-1">
-                <span className={`text-sm ${check.status === 'fail' ? 'text-red-600 font-medium' : check.status === 'warn' ? 'text-yellow-700' : 'text-brown-800'}`}>
-                  {check.label}
-                </span>
-                {check.detail && (
-                  <p className="text-xs text-brown-500 mt-0.5 break-words">{check.detail}</p>
-                )}
-                {suggestedTag && onTagAdd && (
-                  <button
-                    onClick={() => onTagAdd(suggestedTag)}
-                    className="mt-1 inline-flex items-center gap-1 bg-orange-500 hover:bg-orange-400 text-white text-xs px-2 py-0.5 uppercase tracking-wide transition-colors cursor-pointer"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="12" y1="5" x2="12" y2="19" />
-                      <line x1="5" y1="12" x2="19" y2="12" />
-                    </svg>
-                    Do this now
-                  </button>
-                )}
-              </div>
-            </li>
-          );
-        })}
+        {sorted.map((check) => (
+          <li key={check.key} className="flex items-start gap-2">
+            <StatusIcon status={check.status} />
+            <div className="min-w-0 flex-1">
+              <span className={`text-sm ${check.status === 'fail' ? 'text-red-600 font-medium' : check.status === 'warn' ? 'text-yellow-700' : 'text-brown-800'}`}>
+                {check.label}
+              </span>
+              {check.detail && (
+                <p className="text-xs text-brown-500 mt-0.5 break-words">{check.detail}</p>
+              )}
+            </div>
+          </li>
+        ))}
       </ul>
     </div>
   );

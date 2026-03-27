@@ -75,7 +75,7 @@ export async function getReadmeContent(owner: string, repo: string): Promise<str
 
 export async function runPreflightChecks(
   githubRepo: string | null,
-  tags: string[],
+  projectTypes: { pcb: boolean; cad: boolean; firmware: boolean },
 ): Promise<{ checks: PreflightCheck[]; canSubmit: boolean }> {
   const checks: PreflightCheck[] = [];
 
@@ -84,7 +84,7 @@ export async function runPreflightChecks(
   if (!parsed) {
     checks.push({
       key: 'github_valid',
-      label: 'GitHub repo valid',
+      label: 'GitHub repo invalid',
       status: 'fail',
       detail: githubRepo ? 'Could not parse GitHub URL' : 'No GitHub repo URL set',
       blocking: true,
@@ -100,7 +100,7 @@ export async function runPreflightChecks(
     else if (repoRes.status === 403) detail = 'Rate limit exceeded - try again in a few minutes';
     else if (repoRes.status >= 500) detail = `GitHub API error (${repoRes.status}) - try again later`;
 
-    checks.push({ key: 'github_valid', label: 'GitHub repo valid', status: 'fail', detail, blocking: true });
+    checks.push({ key: 'github_valid', label: 'GitHub repo not accessible', status: 'fail', detail, blocking: true });
     return { checks, canSubmit: false };
   }
 
@@ -118,29 +118,29 @@ export async function runPreflightChecks(
   const readmeExists = readmeContent !== null;
   checks.push({
     key: 'readme_exists',
-    label: 'README exists',
+    label: readmeExists ? 'README found' : 'README missing',
     status: readmeExists ? 'pass' : 'fail',
-    detail: readmeExists ? undefined : 'No README found in repository',
-    blocking: !readmeExists,
+    detail: readmeExists ? undefined : 'No README found in repository - a README is required to submit',
+    blocking: true,
   });
 
-  // Check 3: README has photos (non-blocking error — photos are required but we won't block submit)
+  // Check 3: README has photos (blocking)
   if (readmeExists) {
     const hasPhoto = IMAGE_PATTERN.test(readmeContent!);
     checks.push({
       key: 'readme_has_photo',
-      label: 'README has photos',
+      label: hasPhoto ? 'README has photos' : 'README photos missing',
       status: hasPhoto ? 'pass' : 'fail',
-      detail: hasPhoto ? undefined : 'No images found in README - projects are required to include photos of your project',
-      blocking: false,
+      detail: hasPhoto ? undefined : 'No images found in README - photos of your project are required to submit',
+      blocking: true,
     });
   } else {
     checks.push({
       key: 'readme_has_photo',
-      label: 'README has photos',
+      label: 'README photos missing',
       status: 'fail',
       detail: 'No README to check',
-      blocking: false,
+      blocking: true,
     });
   }
 
@@ -149,82 +149,82 @@ export async function runPreflightChecks(
   const found3dSource = filePaths.filter((p) => THREE_D_SOURCE_EXTENSIONS.some((ext) => p.endsWith(ext)));
   const foundPcbSource = filePaths.filter((p) => PCB_SOURCE_EXTENSIONS.some((ext) => p.endsWith(ext)));
   const foundPcbFab = filePaths.filter((p) => PCB_FAB_EXTENSIONS.some((ext) => p.endsWith(ext)));
+  const foundFirmware = filePaths.filter((p) => FIRMWARE_EXTENSIONS.some((ext) => p.endsWith(ext)));
 
-  const hasPcbTag = tags.includes('PCB');
-  const hasCadTag = tags.includes('CAD');
-
-  // Check 4: CAD source file warnings
-  // Only warn if project is tagged CAD or has 3D model exports (STL/OBJ)
-  if (found3d.length > 0 && found3dSource.length === 0) {
-    checks.push({
-      key: 'cad_source_missing',
-      label: '3D source file missing',
-      status: 'warn',
-      detail: 'Found 3D model files (STL/OBJ) but no source design files (.STEP, .F3D, etc.) - please include your source files',
-      blocking: false,
-    });
-  } else if (hasCadTag && found3dSource.length === 0) {
-    checks.push({
-      key: 'cad_source_missing',
-      label: '3D source file missing',
-      status: 'warn',
-      detail: 'Project includes custom CAD but no source design files (.STEP, .F3D, etc.) were found - please include your source files',
-      blocking: false,
-    });
-  } else if (found3dSource.length > 0) {
-    checks.push({
-      key: 'cad_source_missing',
-      label: '3D source file',
-      status: 'pass',
-      detail: found3dSource.slice(0, 3).join(', '),
-    });
+  // Check 4: CAD source files (blocking if CAD project)
+  if (projectTypes.cad) {
+    if (found3dSource.length > 0) {
+      checks.push({
+        key: 'cad_source',
+        label: 'CAD source files found',
+        status: 'pass',
+        detail: found3dSource.slice(0, 3).join(', '),
+      });
+    } else {
+      checks.push({
+        key: 'cad_source',
+        label: 'CAD source files missing',
+        status: 'fail',
+        detail: 'No source design files (.STEP, .F3D, .SCAD, etc.) found - these are required for CAD projects',
+        blocking: true,
+      });
+    }
+    if (found3d.length > 0) {
+      checks.push({
+        key: 'cad_models',
+        label: '3D model files found',
+        status: 'pass',
+        detail: found3d.slice(0, 3).join(', '),
+      });
+    }
   }
 
-  // Check 5: PCB source file warnings
-  // Only warn if project is tagged PCB or has gerber/fab files
-  if (foundPcbFab.length > 0 && foundPcbSource.length === 0) {
-    checks.push({
-      key: 'pcb_source_missing',
-      label: 'PCB source file missing',
-      status: 'warn',
-      detail: 'Found fabrication/Gerber files but no PCB source files (.kicad_pcb, .brd, etc.) - please include your source files',
-      blocking: false,
-    });
-  } else if (hasPcbTag && foundPcbSource.length === 0) {
-    checks.push({
-      key: 'pcb_source_missing',
-      label: 'PCB source file missing',
-      status: 'warn',
-      detail: 'Project includes custom PCB but no source files (.kicad_pcb, .brd, etc.) were found - please include your source files',
-      blocking: false,
-    });
-  } else if (foundPcbSource.length > 0) {
-    checks.push({
-      key: 'pcb_source_missing',
-      label: 'PCB source file',
-      status: 'pass',
-      detail: foundPcbSource.slice(0, 3).join(', '),
-    });
+  // Check 5: PCB source files (blocking if PCB project)
+  if (projectTypes.pcb) {
+    if (foundPcbSource.length > 0) {
+      checks.push({
+        key: 'pcb_source',
+        label: 'PCB source files found',
+        status: 'pass',
+        detail: foundPcbSource.slice(0, 3).join(', '),
+      });
+    } else {
+      checks.push({
+        key: 'pcb_source',
+        label: 'PCB source files missing',
+        status: 'fail',
+        detail: 'No PCB source files (.kicad_pcb, .brd, etc.) found - these are required for PCB projects',
+        blocking: true,
+      });
+    }
+    if (foundPcbFab.length > 0) {
+      checks.push({
+        key: 'pcb_fab',
+        label: 'PCB fabrication files found',
+        status: 'pass',
+        detail: `${foundPcbFab.length} file(s)`,
+      });
+    }
   }
 
-  // Check 6: Auto-detect suggestions
-  if (!hasPcbTag && (foundPcbSource.length > 0 || foundPcbFab.length > 0)) {
-    checks.push({
-      key: 'suggest_pcb_tag',
-      label: 'PCB files detected',
-      status: 'info',
-      detail: 'We found PCB files in your repo - consider tagging your project as Custom PCB',
-      blocking: false,
-    });
-  }
-  if (!hasCadTag && (found3d.length > 0 || found3dSource.length > 0)) {
-    checks.push({
-      key: 'suggest_cad_tag',
-      label: 'CAD files detected',
-      status: 'info',
-      detail: 'We found 3D/CAD files in your repo - consider tagging your project as Custom CAD',
-      blocking: false,
-    });
+  // Check 6: Firmware files (blocking if firmware project)
+  if (projectTypes.firmware) {
+    if (foundFirmware.length > 0) {
+      checks.push({
+        key: 'firmware',
+        label: 'Firmware files found',
+        status: 'pass',
+        detail: `${foundFirmware.length} file(s)`,
+      });
+    } else {
+      checks.push({
+        key: 'firmware',
+        label: 'Firmware files missing',
+        status: 'fail',
+        detail: 'No firmware files (.ino, .c, .cpp, .py, etc.) found - these are required for projects with firmware',
+        blocking: true,
+      });
+    }
   }
 
   const canSubmit = !checks.some((c) => c.blocking && c.status === 'fail');
