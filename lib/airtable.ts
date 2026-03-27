@@ -404,6 +404,7 @@ export async function submitYSWSProjectSubmission(data: {
   stasisId: string | null;
   slackId: string | null;
   guide: string | null;
+  stage: 'Design' | 'Build';
 }): Promise<void> {
   const base = getAirtableBase();
   if (!base) {
@@ -435,6 +436,7 @@ export async function submitYSWSProjectSubmission(data: {
     'Stasis ID': data.stasisId || '',
     'Slack ID': data.slackId || '',
     'guide': data.guide || '',
+    'Stage': data.stage,
   };
 
   if (data.bannerUrl) fields['Screenshot'] = [{ url: data.bannerUrl }];
@@ -443,7 +445,7 @@ export async function submitYSWSProjectSubmission(data: {
   if (data.stasisId) {
     const existing = await base(tableName)
       .select({
-        filterByFormula: `{Stasis ID} = '${data.stasisId.replace(/'/g, "\\'")}'`,
+        filterByFormula: `AND({Stasis ID} = '${data.stasisId.replace(/'/g, "\\'")}', {Stage} = '${data.stage}')`,
         maxRecords: 1,
       })
       .firstPage();
@@ -542,6 +544,7 @@ export async function syncProjectToAirtable(
     stasisId: project.id,
     slackId: user.slackId ?? null,
     guide: project.starterProjectId ? (STARTER_PROJECT_NAMES[project.starterProjectId] ?? project.starterProjectId) : null,
+    stage: options?.buildOnly ? 'Build' : 'Design',
   });
 }
 
