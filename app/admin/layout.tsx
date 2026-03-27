@@ -140,6 +140,11 @@ export default function AdminLayout({
                   Purchases
                 </Link>
               )}
+              {hasPermission(Permission.MANAGE_CURRENCY) && (
+                <Link href="/admin/reviewer-payments" className={getTabClass('/admin/reviewer-payments')}>
+                  Reviewer Pay
+                </Link>
+              )}
               {hasPermission(Permission.MANAGE_USERS) && (
                 <Link href="/admin/stats" className={getTabClass('/admin/stats')}>
                   Stats

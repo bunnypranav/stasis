@@ -27,6 +27,7 @@ enum CurrencyTransactionType {
   ADMIN_GRANT       // Reviewer manually credits bits
   ADMIN_DEDUCTION   // Reviewer manually debits bits (correction, etc.)
   SHOP_PURCHASE     // User spends bits on a shop item
+  REVIEWER_PAYMENT  // Bits credited for completing reviews (0.5 bits each)
 }
 
 enum ReviewDecision {
@@ -430,6 +431,7 @@ enum AuditAction {
   REVIEWER_RETURN
   REVIEWER_REJECT
   ADMIN_MOVE_QUEUE
+  ADMIN_PAY_REVIEWER
 
   // Security events
   SUPERADMIN_GRANT
@@ -554,6 +556,7 @@ model SubmissionReview {
   frozenTier          Int?
   frozenReviewerNote  String?
 
+  paidAt    DateTime?
   createdAt DateTime @default(now())
 
   @@index([submissionId])

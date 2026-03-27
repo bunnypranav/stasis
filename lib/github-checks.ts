@@ -31,7 +31,8 @@ export const IMAGE_PATTERN = /!\[.*?\]\(.*?\)|<img\s+[^>]*src\s*=|\.png|\.jpg|\.
 
 export function parseGitHubRepo(url: string): { owner: string; repo: string } | null {
   try {
-    const u = new URL(url);
+    const normalized = /^https?:\/\//i.test(url) ? url : `https://${url}`;
+    const u = new URL(normalized);
     if (!u.hostname.includes('github.com')) return null;
     const parts = u.pathname.split('/').filter(Boolean);
     if (parts.length < 2) return null;
