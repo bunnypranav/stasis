@@ -469,7 +469,7 @@ export default function ReviewDetailPage() {
                     <span className="text-cream-400 text-xs">·</span>
                     <span className="text-cream-600 text-xs font-mono">{project.user.slackId}</span>
                     <a
-                      href={`https://hackclub.enterprise.slack.com/archives/${project.user.slackId}`}
+                      href={`https://hackclub.enterprise.slack.com/team/${project.user.slackId}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-xs px-2 py-0.5 bg-brown-100 hover:bg-brown-200 text-brown-700 border border-brown-300 rounded transition-colors"
