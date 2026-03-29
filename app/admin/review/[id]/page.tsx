@@ -597,9 +597,25 @@ export default function ReviewDetailPage() {
                   <span className="text-xs px-2 py-0.5 bg-brown-900 text-cream-50 border border-cream-500/20 uppercase">Unscored</span>
                 )}
               </div>
-              <p className="text-cream-200 text-xs">
-                Submitted {new Date(submission.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-              </p>
+              <div className="flex items-center gap-2 mt-0.5">
+                <p className="text-cream-200 text-xs">
+                  Submitted {new Date(submission.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                </p>
+                {project.user.slackId && (
+                  <>
+                    <span className="text-cream-500 text-xs">·</span>
+                    <span className="text-cream-300 text-xs font-mono">{project.user.slackId}</span>
+                    <a
+                      href={`https://hackclub.enterprise.slack.com/archives/${project.user.slackId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs px-2 py-0.5 bg-cream-500/10 hover:bg-cream-500/20 text-cream-200 border border-cream-500/20 rounded transition-colors"
+                    >
+                      DM on Slack
+                    </a>
+                  </>
+                )}
+              </div>
             </div>
           </div>
 
