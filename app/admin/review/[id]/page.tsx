@@ -589,7 +589,7 @@ export default function ReviewDetailPage() {
             )}
             <div>
               <div className="flex items-center gap-2">
-                <p className="text-cream-50 text-sm">{project.user.name || project.user.email}</p>
+                <Link href={`/admin/users?search=${encodeURIComponent(project.user.email)}`} className="text-cream-50 text-sm hover:text-orange-400 transition-colors underline decoration-cream-500/30 hover:decoration-orange-400">{project.user.name || project.user.email}</Link>
                 {project.user.fraudConvicted ? (
                   <span className="text-xs px-2 py-0.5 bg-red-600 text-white uppercase">Fraud</span>
                 ) : hackatimeTrustLevel === 'red' ? (
@@ -1150,7 +1150,7 @@ export default function ReviewDetailPage() {
                   <div className="mb-4 bg-orange-500/10 border border-orange-500/40 p-4">
                     <div className="flex items-center justify-between mb-3">
                       <p className="text-orange-400 text-xs uppercase font-medium">
-                        First-pass review by {firstPassReview.reviewerName || 'Reviewer'}
+                        First-pass review by <Link href={`/admin/users?search=${encodeURIComponent(firstPassReview.reviewerId)}`} className="hover:text-orange-300 underline decoration-orange-400/30 hover:decoration-orange-300">{firstPassReview.reviewerName || 'Reviewer'}</Link>
                       </p>
                       <span className="text-cream-200 text-xs">
                         {new Date(firstPassReview.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
@@ -1340,7 +1340,7 @@ function ReviewCard({ review, defaultExpanded }: {
             {review.result}
           </span>
           {review.reviewerName && (
-            <span className="text-cream-50 text-xs font-medium">by {review.reviewerName}</span>
+            <Link href={`/admin/users?search=${encodeURIComponent(review.reviewerId)}`} className="text-cream-50 text-xs font-medium hover:text-orange-400 transition-colors">by {review.reviewerName}</Link>
           )}
           <span className="text-cream-200 text-xs">
             {new Date(review.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}

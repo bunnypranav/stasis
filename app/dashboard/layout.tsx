@@ -9,6 +9,7 @@ import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useRoles, Role } from "@/lib/hooks/useRoles";
 import { TamagotchiCompanion } from '../components/tamagotchi/TamagotchiCompanion';
+import { ImpersonationBanner } from '../components/ImpersonationBanner';
 
 
 
@@ -144,6 +145,7 @@ export default function DashboardLayout({
 
   return (
     <>
+      <ImpersonationBanner />
       <div className="min-h-screen bg-[linear-gradient(#DAD2BF99,#DAD2BF99),url(/noise-smooth.png)] font-mono relative overflow-hidden">
 
         {/* Header */}

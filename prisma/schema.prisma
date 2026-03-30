@@ -435,6 +435,7 @@ enum AuditAction {
   ADMIN_PAY_REVIEWER
 
   // Security events
+  ADMIN_IMPERSONATE
   SUPERADMIN_GRANT
   
   // User actions on sensitive data
