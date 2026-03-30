@@ -283,7 +283,7 @@ export async function POST(
           await tx.workSession.update({
             where: { id: session.id },
             data: {
-              hoursApproved: workUnitsOverride ?? session.hoursClaimed,
+              hoursApproved: session.hoursClaimed,
               reviewedAt: new Date(),
               reviewedBy: reviewerId,
             },
@@ -447,11 +447,10 @@ export async function POST(
       lines.push(`User: ${project!.user.name || "Unknown"}`)
       if (tierInfo) lines.push(`Tier: ${tierInfo.name} (${tierInfo.bits} bits, ${tierInfo.minHours}-${tierInfo.maxHours === Infinity ? "67+" : tierInfo.maxHours}h range)`)
       lines.push("")
+      const approvedHours = workUnitsOverride != null ? workUnitsOverride : relevantHours
       lines.push(`This user logged ${relevantHours.toFixed(1)} ${isBuildApproval ? "build " : ""}hours across ${relevantCount} journal entr${relevantCount === 1 ? "y" : "ies"}.`)
-      const approvedHours = relevantSessions.reduce((sum, s) => sum + (s.hoursApproved ?? s.hoursClaimed), 0)
-      const deflation = relevantHours - approvedHours
-      if (deflation !== 0) {
-        lines.push(`Journal deflated by ${deflation.toFixed(1)}h (claimed ${relevantHours.toFixed(1)}h → approved ${approvedHours.toFixed(1)}h)`)
+      if (workUnitsOverride != null && workUnitsOverride !== relevantHours) {
+        lines.push(`Reviewer overrode hours to ${workUnitsOverride}h (claimed ${relevantHours.toFixed(1)}h → approved ${workUnitsOverride}h)`)
       }
       if (!isBuildApproval) {
         if (designSessions.length > 0) lines.push(`  Design: ${designHours.toFixed(1)}h across ${designSessions.length} entr${designSessions.length === 1 ? "y" : "ies"}`)
@@ -486,7 +485,10 @@ export async function POST(
       const hoursJustification = lines.join("\n")
 
       try {
-        await syncProjectToAirtable(project!.userId, project!, hoursJustification, effectiveGrant ?? bomCost, isBuildApproval ? { buildOnly: true } : undefined)
+        const syncOptions: { buildOnly?: boolean; approvedHours?: number } = {}
+        if (isBuildApproval) syncOptions.buildOnly = true
+        if (workUnitsOverride != null) syncOptions.approvedHours = workUnitsOverride
+        await syncProjectToAirtable(project!.userId, project!, hoursJustification, effectiveGrant ?? bomCost, syncOptions)
       } catch (err) {
         console.error(`Failed to sync project to Airtable on ${stageKey} approval:`, err)
       }

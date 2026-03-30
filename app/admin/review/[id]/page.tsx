@@ -65,6 +65,9 @@ interface ReviewData {
       }>;
       firmwareHours: number;
       journalHours: number;
+      allJournalHours: number;
+      designHours: number;
+      designReviewedAt: string | null;
       submissions: Array<{ id: string; stage: string; createdAt: string }>;
     };
     reviews: Array<{
@@ -619,9 +622,17 @@ export default function ReviewDetailPage() {
             </div>
           </div>
 
+          {submission.stage === 'BUILD' && project.designHours > 0 && (
+            <div className="mb-3 px-3 py-2 bg-green-500/10 border border-green-500/30 text-sm">
+              <span className="text-green-400">Build review:</span>
+              <span className="text-cream-50 ml-2">Showing {project.journalHours}h logged after design approval</span>
+              <span className="text-cream-500 ml-1">({project.designHours}h design + {project.journalHours}h build = {project.allJournalHours}h total)</span>
+            </div>
+          )}
+
           <div className="grid grid-cols-3 sm:grid-cols-6 gap-4 mb-4 text-sm">
             <div>
-              <p className="text-cream-200 text-xs uppercase">Work Units</p>
+              <p className="text-cream-200 text-xs uppercase">{submission.stage === 'BUILD' ? 'Build Hours' : 'Work Units'}</p>
               <p className="text-cream-50">{project.totalWorkUnits}h</p>
             </div>
             <div>
