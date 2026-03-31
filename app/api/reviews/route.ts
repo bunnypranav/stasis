@@ -167,18 +167,11 @@ export async function GET(request: NextRequest) {
     }
   })
 
-  // Sort by time waiting (longest first), then shuffle within the page
-  items.sort((a, b) => b.waitingMs - a.waitingMs)
-
-  // Sort by most hours if requested
+  // Sort by time waiting (longest first), with pre-reviewed items always on top
   if (sort === "most_hours") {
     items.sort((a, b) => b.workUnits - a.workUnits)
-  }
-
-  // Shuffle the page results so order varies each load
-  for (let i = items.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [items[i], items[j]] = [items[j], items[i]]
+  } else {
+    items.sort((a, b) => b.waitingMs - a.waitingMs)
   }
 
   // Always sort pre-reviewed (first-pass reviewed) items to the top
