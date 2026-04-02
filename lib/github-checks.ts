@@ -45,7 +45,8 @@ export function parseGitHubRepo(url: string): { owner: string; repo: string } | 
 export async function ghFetch(path: string) {
   const headers: Record<string, string> = {};
   if (API_KEY) headers['X-API-Key'] = API_KEY;
-  const res = await fetch(`${GH_PROXY}/${path}`, { headers });
+  headers['Cache-Control'] = 'no-cache';
+  const res = await fetch(`${GH_PROXY}/${path}`, { headers, cache: 'no-store' });
   return res;
 }
 
