@@ -1,7 +1,7 @@
 // Tamagotchi Streak Challenge — event configuration and helpers
 
 export const TAMAGOTCHI_EVENT = {
-  START: '2026-03-30',
+  START: '2026-03-27',
   END: '2026-04-13',
   STREAK_GOAL: 7,
   TOTAL_DAYS: 15,
