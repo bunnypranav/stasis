@@ -290,7 +290,7 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
       const previewRes = await fetch(`/api/projects/${project.id}/sessions/import`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ markdown, dryRun: true }),
+        body: JSON.stringify({ markdown, dryRun: true, tz: Intl.DateTimeFormat().resolvedOptions().timeZone }),
       });
       if (!previewRes.ok) {
         const data = await previewRes.json();
@@ -303,7 +303,7 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
       const res = await fetch(`/api/projects/${project.id}/sessions/import`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ markdown }),
+        body: JSON.stringify({ markdown, tz: Intl.DateTimeFormat().resolvedOptions().timeZone }),
       });
       if (res.ok) {
         const data = await res.json();

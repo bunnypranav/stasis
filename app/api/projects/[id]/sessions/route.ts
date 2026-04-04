@@ -6,6 +6,7 @@ import { SessionCategory, MediaType, ProjectStage } from "@/app/generated/prisma
 import { sanitize } from "@/lib/sanitize"
 import { isValidUrl } from "@/lib/url"
 import { getUserRoles, hasRole, Role } from "@/lib/permissions"
+import { getLocalDateStr, validateTimezone } from "@/lib/tamagotchi"
 
 const VALID_STAGES: ProjectStage[] = ["DESIGN", "BUILD"]
 
@@ -121,7 +122,7 @@ export async function POST(
   //   )
   // }
 
-  const { title, hoursClaimed, content, categories, media, stage: rawStage, timelapseIds } = body
+  const { title, hoursClaimed, content, categories, media, stage: rawStage, timelapseIds, tz } = body
   
   // Determine stage - default to BUILD if design is approved, otherwise DESIGN
   const stage: ProjectStage = VALID_STAGES.includes(rawStage) 
@@ -230,6 +231,10 @@ export async function POST(
     })
   )
 
+  // Compute effectiveDate from user's timezone at creation time (for tamagotchi streaks)
+  const validatedTz = tz ? validateTimezone(tz) : null
+  const effectiveDate = validatedTz ? getLocalDateStr(new Date(), validatedTz) : null
+
   const workSession = await prisma.workSession.create({
     data: {
       title: sanitize(title.trim()),
@@ -238,6 +243,7 @@ export async function POST(
       categories: validatedCategories,
       stage,
       projectId,
+      effectiveDate,
       media: {
         create: validatedMedia.map((m) => ({
           type: m.type as MediaType,

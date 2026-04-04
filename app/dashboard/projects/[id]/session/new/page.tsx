@@ -64,6 +64,7 @@ export default function NewSessionPage({ params }: { params: Promise<{ id: strin
         body: JSON.stringify({
           ...data,
           stage,
+          tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
         }),
       });
 

@@ -69,13 +69,15 @@ export async function GET(request: NextRequest) {
     select: {
       createdAt: true,
       content: true,
+      effectiveDate: true,
     },
   })
 
-  // Group by effective date (applying grace period + user timezone)
+  // Group by effective date — prefer stored effectiveDate (set at creation time in user's TZ),
+  // fall back to computing from createdAt + current TZ for older sessions without it
   const dayMap = new Map<string, { hasJournal: boolean; sessions: number }>()
   for (const ws of workSessions) {
-    const dateStr = getEffectiveDate(ws.createdAt, tz)
+    const dateStr = ws.effectiveDate ?? getEffectiveDate(ws.createdAt, tz)
     // Clamp to event window
     if (dateStr < TAMAGOTCHI_EVENT.START || dateStr > TAMAGOTCHI_EVENT.END) continue
     const existing = dayMap.get(dateStr) || { hasJournal: false, sessions: 0 }

@@ -134,7 +134,7 @@ export function NewProjectModal({ isOpen, onClose, onSubmit, error }: Readonly<P
         const res = await fetch(`/api/projects/${result.projectId}/sessions/import`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ markdown }),
+          body: JSON.stringify({ markdown, tz: Intl.DateTimeFormat().resolvedOptions().timeZone }),
         })
         if (res.ok) {
           const data = await res.json()

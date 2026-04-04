@@ -260,6 +260,8 @@ export async function POST(request: NextRequest) {
               stage: "DESIGN",
               projectId: project.id,
               createdAt: entry.createdAt,
+              // For blueprint imports, derive effectiveDate from the parsed date
+              effectiveDate: entry.createdAt.toISOString().slice(0, 10),
               media: {
                 create: entry.images.map((url) => ({
                   type: "IMAGE" as MediaType,

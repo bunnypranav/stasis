@@ -302,6 +302,7 @@ model WorkSession {
   content        String?
   categories     SessionCategory[]
   stage          ProjectStage      @default(BUILD)
+  effectiveDate  String?           // YYYY-MM-DD in user's local tz at creation time (for tamagotchi streaks)
   reviewComments String?
   reviewedAt     DateTime?
   reviewedBy     String?
