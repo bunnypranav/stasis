@@ -76,7 +76,7 @@ export async function POST(request: Request) {
         note: `Fix: pending bits reversed — build already approved`,
       })
     })
-    results.push({ projectId: item.projectId, reversed: item.pendingAmount })
+    results.push({ projectId: item.projectId ?? "", reversed: item.pendingAmount })
   }
 
   return NextResponse.json({
