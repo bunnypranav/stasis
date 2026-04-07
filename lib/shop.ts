@@ -1,9 +1,11 @@
-export type ShopItemCategory = 'invite' | 'flight_stipend'
+export type ShopItemCategory = 'invite' | 'flight_stipend' | 'accommodation'
 
 export const SHOP_ITEM_IDS = {
   STASIS_EVENT_INVITE: 'stasis-event-invite',
   OPEN_SAUCE_TICKET: 'open-sauce-ticket',
   FLIGHT_STIPEND: 'flight-stipend',
+  PRE_EVENT_ACCOMMODATION: 'pre-event-accommodation',
+  POST_EVENT_ACCOMMODATION: 'post-event-accommodation',
 } as const
 
 export type ShopItemId = (typeof SHOP_ITEM_IDS)[keyof typeof SHOP_ITEM_IDS]
@@ -21,6 +23,12 @@ export interface ShopItem {
 export const EVENT_INVITE_IDS: readonly ShopItemId[] = [
   SHOP_ITEM_IDS.STASIS_EVENT_INVITE,
   SHOP_ITEM_IDS.OPEN_SAUCE_TICKET,
+]
+
+/** IDs of items that require the Stasis Event Invite specifically. */
+export const REQUIRES_STASIS_INVITE_IDS: readonly ShopItemId[] = [
+  SHOP_ITEM_IDS.PRE_EVENT_ACCOMMODATION,
+  SHOP_ITEM_IDS.POST_EVENT_ACCOMMODATION,
 ]
 
 export const SHOP_ITEMS: readonly ShopItem[] = [
@@ -47,5 +55,21 @@ export const SHOP_ITEMS: readonly ShopItem[] = [
     bitsCost: 10,
     category: 'flight_stipend',
     maxPerUser: 0,
+  },
+  {
+    id: SHOP_ITEM_IDS.PRE_EVENT_ACCOMMODATION,
+    name: 'Pre-Event Accommodation',
+    description: 'Stay the night before Stasis. (For Stasis Only!)',
+    bitsCost: 100,
+    category: 'accommodation',
+    maxPerUser: 1,
+  },
+  {
+    id: SHOP_ITEM_IDS.POST_EVENT_ACCOMMODATION,
+    name: 'Post-Event Accommodation',
+    description: 'Stay the night after Stasis. (For Stasis Only!)',
+    bitsCost: 100,
+    category: 'accommodation',
+    maxPerUser: 1,
   },
 ] as const
