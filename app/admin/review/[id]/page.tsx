@@ -3,8 +3,15 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { getTierById, TIERS } from '@/lib/tiers';
 import { bomItemTotal } from '@/lib/format';
+import { fixMarkdownImages } from '@/lib/markdown';
+
+const MDPreview = dynamic(
+  () => import('@uiw/react-md-editor').then((mod) => mod.default.Markdown),
+  { ssr: false }
+);
 
 // ─── Types ───────────────────────────────────────────────────────────
 
@@ -908,7 +915,9 @@ export default function ReviewDetailPage() {
                   </div>
                 </div>
                 {session.content && (
-                  <p className="text-cream-50 text-xs mt-2 whitespace-pre-wrap">{session.content}</p>
+                  <div className="mt-2 wmde-markdown-var [&_.wmde-markdown]:!bg-transparent [&_.wmde-markdown]:!text-cream-50 [&_.wmde-markdown]:!text-xs [&_.wmde-markdown]:!font-[inherit] [&_.wmde-markdown_img]:max-h-64 [&_.wmde-markdown_img]:border [&_.wmde-markdown_img]:border-cream-500/20 [&_.wmde-markdown_img]:my-2 [&_.wmde-markdown_p]:my-1" data-color-mode="light">
+                    <MDPreview source={fixMarkdownImages(session.content)} />
+                  </div>
                 )}
                 {session.media.length > 0 && (
                   <div className="flex gap-2 mt-2 flex-wrap">
