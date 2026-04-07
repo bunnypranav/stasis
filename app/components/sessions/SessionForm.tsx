@@ -115,7 +115,12 @@ export function SessionForm({
         setUploadingToEditor(true);
         const placeholderUrl = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
         const placeholder = `\n![Uploading ${file.name}...](${placeholderUrl})\n`;
-        setContent(prev => prev + placeholder);
+        if (editorRef.current?.querySelector("textarea")) {
+            const cursorPos = editorRef.current?.querySelector("textarea")?.selectionStart ?? 0;
+            setContent(prev => prev.slice(0, cursorPos) + placeholder + prev.slice(cursorPos));
+        } else {
+            setContent(prev => prev + placeholder);
+        }
 
         try {
             const formData = new FormData();
