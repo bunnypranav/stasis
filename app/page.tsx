@@ -597,27 +597,6 @@ export function HomeContent({ skipRedirect = false, event = 'stasis' as GoalPref
               <DottedLine orientation="horizontal" />
             </div>
 
-            {/* Can't Attend IRL? */}
-            <section className="space-y-3 md:space-y-4 md:px-5 py-1">
-              <h2 className="text-[24px] uppercase text-brown-800">
-                <ScrambleText>{">>: Can't Attend IRL?"}</ScrambleText>
-              </h2>
-              <p className="text-[14px] md:text-[18px] leading-snug text-brown-800">
-                <ScrambleText>No worries! Whether or not you attend, by making hardware projects you can</ScrambleText>{' '}<span className="text-orange-500"><ScrambleText>pick items from our shop</ScrambleText></span><ScrambleText>, like 3d printers, oscilloscopes, dev boards, & more:</ScrambleText>
-              </p>
-              <ImageCarousel />
-            </section>
-
-            <div className="absolute left-1/2 w-screen h-px -translate-x-1/2">
-              <DottedLine orientation="horizontal" />
-            </div>
-
-            <ASCIIArt art={asciiArt.fish} horizontalPosition={65} verticalOffset="55rem" />
-            <ASCIIArt art={asciiArt.cat} horizontalPosition={85} verticalOffset="62rem" />
-            <ASCIIArt art={asciiArt.roflcopter} horizontalPosition={35} verticalOffset="85rem" />
-            <ASCIIArt art={asciiArt.duck} horizontalPosition={90} verticalOffset="90rem" />
-            <ASCIIArt art={asciiArt.donut} horizontalPosition={12} verticalOffset="48rem" />
-
             {/* Earn a Certificate */}
             <section className="space-y-3 md:space-y-4 md:px-5 py-1">
               <h2 className="text-[24px] uppercase text-brown-800">
@@ -649,6 +628,27 @@ export function HomeContent({ skipRedirect = false, event = 'stasis' as GoalPref
                   </div>
                 </div>
               </div>
+            </section>
+
+            <div className="absolute left-1/2 w-screen h-px -translate-x-1/2">
+              <DottedLine orientation="horizontal" />
+            </div>
+
+            <ASCIIArt art={asciiArt.fish} horizontalPosition={65} verticalOffset="55rem" />
+            <ASCIIArt art={asciiArt.cat} horizontalPosition={85} verticalOffset="62rem" />
+            <ASCIIArt art={asciiArt.roflcopter} horizontalPosition={35} verticalOffset="85rem" />
+            <ASCIIArt art={asciiArt.duck} horizontalPosition={90} verticalOffset="90rem" />
+            <ASCIIArt art={asciiArt.donut} horizontalPosition={12} verticalOffset="48rem" />
+
+            {/* Can't Attend IRL? */}
+            <section className="space-y-3 md:space-y-4 md:px-5 py-1">
+              <h2 className="text-[24px] uppercase text-brown-800">
+                <ScrambleText>{">>: Can't Attend IRL?"}</ScrambleText>
+              </h2>
+              <p className="text-[14px] md:text-[18px] leading-snug text-brown-800">
+                <ScrambleText>No worries! Whether or not you attend, by making hardware projects you can</ScrambleText>{' '}<span className="text-orange-500"><ScrambleText>pick items from our shop</ScrambleText></span><ScrambleText>, like 3d printers, oscilloscopes, dev boards, & more:</ScrambleText>
+              </p>
+              <ImageCarousel />
             </section>
 
             <div className="absolute left-1/2 w-screen h-px -translate-x-1/2">
