@@ -593,6 +593,15 @@ export default function AdminUsersPage() {
                                 IDV {user.verificationStatus || 'Unknown'}
                               </span>
                             )}
+                            {user.eventPreference && (
+                              <span className={`text-xs px-2 py-0.5 uppercase ${
+                                user.eventPreference === 'stasis' ? 'bg-orange-500 text-white' :
+                                user.eventPreference === 'opensauce' ? 'bg-blue-500 text-white' :
+                                'bg-yellow-500 text-white'
+                              }`}>
+                                {GOAL_LABELS[user.eventPreference as GoalPreference] || user.eventPreference}
+                              </span>
+                            )}
                           </div>
                           <p className="text-cream-50 text-sm truncate">
                             {user.email}
