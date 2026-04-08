@@ -414,7 +414,7 @@ export function TamagotchiOverlay({ onClose, status }: Props) {
         style={{ background: 'var(--color-orange-500)' }}
       >
         {/* Grid texture */}
-        <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'url(/grid-texture.png)', backgroundSize: '4rem 4rem', imageRendering: 'pixelated' }} />
+        <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'url(/grid-texture.png)', backgroundSize: '4rem 4rem', backgroundPosition: `${gridPos.x}px ${gridPos.y}px`, imageRendering: 'pixelated' }} />
 
         {/* Back button */}
         <div className="absolute top-4 left-4 sm:top-6 sm:left-6 2xl:top-8 2xl:left-8 z-30">
@@ -449,7 +449,7 @@ export function TamagotchiOverlay({ onClose, status }: Props) {
       <div className="absolute bottom-0 left-0 right-0 pointer-events-none" style={{ height: 'max(17.5vh, 175px)', background: 'linear-gradient(to top, #34291E, #34291E00)' }} />
 
       {/* Grid texture */}
-      <div className="absolute inset-0 opacity-40 pointer-events-none" style={{ backgroundImage: 'url(/grid-texture.png)', backgroundSize: '4rem 4rem', backgroundPosition: `${gridPos.x}px ${gridPos.y}px`, imageRendering: 'pixelated' }} />
+      <div className="absolute inset-0 opacity-30 pointer-events-none" style={{ backgroundImage: 'url(/grid-texture.png)', backgroundSize: '4rem 4rem', backgroundPosition: `${gridPos.x}px ${gridPos.y}px`, imageRendering: 'pixelated' }} />
 
       {/* Back button */}
       <div className="absolute top-4 left-4 sm:top-6 sm:left-6 2xl:top-8 2xl:left-8 z-30 transition-opacity duration-1000" style={{ opacity: showBackButton ? 1 : 0, pointerEvents: showBackButton ? 'auto' : 'none' }}>
