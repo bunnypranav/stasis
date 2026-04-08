@@ -16,7 +16,8 @@ export async function GET() {
   const base = new Airtable({ apiKey }).base(baseId)
   const tableName = process.env.AIRTABLE_YSWS_TABLE_NAME || "YSWS Project Submission"
 
-  // Fetch all Stasis IDs from Airtable
+  // Fetch all Stasis IDs from Airtable, tracking both stage-specific and stage-agnostic keys
+  const syncedByStage = new Set<string>()
   const syncedIds = new Set<string>()
   await base(tableName)
     .select({ fields: ["Stasis ID", "Stage"] })
@@ -24,7 +25,10 @@ export async function GET() {
       for (const r of records) {
         const stasisId = r.get("Stasis ID") as string | undefined
         const stage = r.get("Stage") as string | undefined
-        if (stasisId) syncedIds.add(`${stasisId}:${stage || ""}`)
+        if (stasisId) {
+          syncedIds.add(stasisId)
+          if (stage) syncedByStage.add(`${stasisId}:${stage}`)
+        }
       }
       fetchNextPage()
     })
@@ -62,7 +66,13 @@ export async function GET() {
   }> = []
 
   for (const p of approvedProjects) {
-    if (p.designStatus === "approved" && !syncedIds.has(`${p.id}:Design`)) {
+    // A project is considered synced for a stage if either:
+    // 1. It has a matching Stasis ID + Stage combo, OR
+    // 2. It has a Stasis ID with no Stage set (legacy records)
+    const hasDesignSync = syncedByStage.has(`${p.id}:Design`) || (syncedIds.has(p.id) && !syncedByStage.has(`${p.id}:Build`))
+    const hasBuildSync = syncedByStage.has(`${p.id}:Build`)
+
+    if (p.designStatus === "approved" && !hasDesignSync) {
       unsynced.push({
         id: p.id,
         title: p.title,
@@ -73,7 +83,7 @@ export async function GET() {
         userEmail: p.user.email,
       })
     }
-    if (p.buildStatus === "approved" && !syncedIds.has(`${p.id}:Build`)) {
+    if (p.buildStatus === "approved" && !hasBuildSync) {
       unsynced.push({
         id: p.id,
         title: p.title,
