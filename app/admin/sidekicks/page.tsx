@@ -341,16 +341,16 @@ export default function AdminSidekicksPage() {
           {sidekicks.length} sidekick{sidekicks.length !== 1 ? 's' : ''} &middot;{' '}
           {allAssignees.length} total assignees
           {totalLt3d > 0 && (
-            <span className="text-green-500"> &middot; {totalLt3d} &lt;3d</span>
+            <span className="text-green-500"> &middot; {totalLt3d} active &lt;3d</span>
           )}
           {total3to7d > 0 && (
-            <span className="text-yellow-500"> &middot; {total3to7d} 3-7d</span>
+            <span className="text-yellow-500"> &middot; {total3to7d} inactive 3-7d</span>
           )}
           {total7to14d > 0 && (
-            <span className="text-orange-500"> &middot; {total7to14d} 7-14d</span>
+            <span className="text-orange-500"> &middot; {total7to14d} inactive 7-14d</span>
           )}
           {total14dPlus > 0 && (
-            <span className="text-red-500"> &middot; {total14dPlus} 14d+</span>
+            <span className="text-red-500"> &middot; {total14dPlus} inactive 14d+</span>
           )}
           {totalNeverActive > 0 && (
             <span className="text-cream-200"> &middot; {totalNeverActive} never active</span>
