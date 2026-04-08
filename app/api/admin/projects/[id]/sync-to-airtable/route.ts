@@ -27,7 +27,7 @@ export async function POST(
     return NextResponse.json({ error: "Project not found" }, { status: 404 })
   }
 
-  // Build justification from review history (same format as build approval flow)
+  // Build justification from review history
   const justLines: string[] = []
   const sessions = project.workSessions
   const designSessions = sessions.filter((s) => s.stage === "DESIGN")
@@ -35,55 +35,72 @@ export async function POST(
   const designHours = designSessions.reduce((sum, s) => sum + s.hoursClaimed, 0)
   const buildHours = buildSessions.reduce((sum, s) => sum + s.hoursClaimed, 0)
   const tierInfo = project.tier ? getTierById(project.tier) : null
+  const isBuildApproved = project.buildStatus === "approved"
+  const baseUrl = process.env.BETTER_AUTH_URL || "http://localhost:3000"
 
-  // Design review context
-  const designReviewAction = await prisma.projectReviewAction.findFirst({
-    where: { projectId: id, stage: "DESIGN", decision: "APPROVED" },
-    orderBy: { createdAt: "desc" },
-    select: { comments: true, createdAt: true, reviewerId: true, grantAmount: true },
-  })
-  if (designReviewAction) {
-    const designReviewer = designReviewAction.reviewerId
-      ? await prisma.user.findUnique({ where: { id: designReviewAction.reviewerId }, select: { name: true, email: true } })
-      : null
-    const designDate = designReviewAction.createdAt.toISOString().slice(0, 10)
-    justLines.push(`--- Design Review (approved ${designDate} by ${designReviewer?.name || designReviewer?.email || "Unknown"}) ---`)
-    if (designReviewAction.comments) justLines.push(designReviewAction.comments)
-    justLines.push(`  Design hours: ${designHours.toFixed(1)}h across ${designSessions.length} entr${designSessions.length === 1 ? "y" : "ies"}`)
-    justLines.push("")
-  }
-
-  // Build review context
-  const buildReviewAction = await prisma.projectReviewAction.findFirst({
-    where: { projectId: id, stage: "BUILD", decision: "APPROVED" },
-    orderBy: { createdAt: "desc" },
-    select: { comments: true, createdAt: true, reviewerId: true },
-  })
-  if (buildReviewAction) {
-    const buildReviewer = buildReviewAction.reviewerId
-      ? await prisma.user.findUnique({ where: { id: buildReviewAction.reviewerId }, select: { name: true, email: true } })
-      : null
-    const buildDate = buildReviewAction.createdAt.toISOString().slice(0, 10)
-    justLines.push(`--- Build Review (approved ${buildDate} by ${buildReviewer?.name || buildReviewer?.email || "Unknown"}) ---`)
-    if (buildReviewAction.comments) justLines.push(buildReviewAction.comments)
-    justLines.push("")
-  }
-
+  justLines.push(isBuildApproved ? `**Build Review**` : `**Design Review**`)
+  justLines.push("")
   justLines.push(`Project: "${project.title}"`)
   justLines.push(`User: ${project.user.name || "Unknown"}`)
   if (tierInfo) justLines.push(`Tier: ${tierInfo.name} (${tierInfo.bits} bits, ${tierInfo.minHours}-${tierInfo.maxHours === Infinity ? "67+" : tierInfo.maxHours}h range)`)
   justLines.push("")
 
-  if (buildSessions.length > 0) {
-    justLines.push(`Build hours: ${buildHours.toFixed(1)}h across ${buildSessions.length} journal entr${buildSessions.length === 1 ? "y" : "ies"}.`)
-    const approvedBuildHours = buildSessions.reduce((sum, s) => sum + (s.hoursApproved ?? s.hoursClaimed), 0)
-    const buildDeflation = buildHours - approvedBuildHours
-    if (buildDeflation !== 0) {
-      justLines.push(`Journal deflated by ${buildDeflation.toFixed(1)}h (claimed ${buildHours.toFixed(1)}h → approved ${approvedBuildHours.toFixed(1)}h)`)
-    }
-    justLines.push("")
+  // For each stage that's approved, show first-pass + second-pass reviews
+  const stages: Array<{ stage: "DESIGN" | "BUILD"; label: string; hours: number; sessionCount: number }> = []
+  if (project.designStatus === "approved") {
+    stages.push({ stage: "DESIGN", label: "design", hours: designHours, sessionCount: designSessions.length })
+  }
+  if (isBuildApproved) {
+    stages.push({ stage: "BUILD", label: "build", hours: buildHours, sessionCount: buildSessions.length })
   }
 
+  for (const { stage, label, hours, sessionCount } of stages) {
+    justLines.push(`This user logged ${hours.toFixed(1)} ${label} hours across ${sessionCount} journal entr${sessionCount === 1 ? "y" : "ies"}.`)
+    justLines.push("")
+
+    // First-pass review
+    const latestSubmission = await prisma.projectSubmission.findFirst({
+      where: { projectId: id, stage },
+      orderBy: { createdAt: "desc" },
+      select: { id: true },
+    })
+    if (latestSubmission) {
+      const firstPass = await prisma.submissionReview.findFirst({
+        where: { submissionId: latestSubmission.id, isAdminReview: false, result: "APPROVED" },
+        orderBy: { createdAt: "desc" },
+        select: { reviewerId: true, feedback: true, createdAt: true },
+      })
+      if (firstPass) {
+        const fpUser = await prisma.user.findUnique({
+          where: { id: firstPass.reviewerId },
+          select: { name: true, email: true },
+        })
+        const fpName = fpUser?.name || fpUser?.email || "Unknown"
+        const fpDate = firstPass.createdAt.toISOString().slice(0, 10)
+        justLines.push(`--- First-pass ${label} review (${fpDate} by ${fpName}) ---`)
+        if (firstPass.feedback) justLines.push(firstPass.feedback)
+        justLines.push("")
+      }
+    }
+
+    // Second-pass (admin) review
+    const reviewAction = await prisma.projectReviewAction.findFirst({
+      where: { projectId: id, stage, decision: "APPROVED" },
+      orderBy: { createdAt: "desc" },
+      select: { comments: true, createdAt: true, reviewerId: true, grantAmount: true },
+    })
+    if (reviewAction) {
+      const reviewer = reviewAction.reviewerId
+        ? await prisma.user.findUnique({ where: { id: reviewAction.reviewerId }, select: { name: true, email: true } })
+        : null
+      const reviewDate = reviewAction.createdAt.toISOString().slice(0, 10)
+      justLines.push(`--- Second-pass ${label} review (${reviewDate} by ${reviewer?.name || reviewer?.email || "Unknown"}) ---`)
+      if (reviewAction.comments) justLines.push(reviewAction.comments)
+      justLines.push("")
+    }
+  }
+
+  // BOM
   const approvedBom = project.bomItems.filter((b) => b.status === "approved" || b.status === "pending")
   const bomItemsCost = approvedBom.reduce((sum, b) => sum + b.totalCost, 0)
   const bomTax = project.bomTax ?? 0
@@ -110,7 +127,14 @@ export async function POST(
   if (project.githubRepo) justLines.push(`GitHub: ${project.githubRepo}`)
   if (project.description) justLines.push(`Description: ${project.description}`)
   justLines.push("")
-  justLines.push(`(Resynced to Airtable by ${authCheck.session.user.name || authCheck.session.user.email})`)
+  justLines.push(`The full journal for this project can be found at ${baseUrl}/dashboard/discover/${id}.`)
+
+  // Get grant amount from design review action
+  const designReviewAction = await prisma.projectReviewAction.findFirst({
+    where: { projectId: id, stage: "DESIGN", decision: "APPROVED" },
+    orderBy: { createdAt: "desc" },
+    select: { grantAmount: true },
+  })
 
   const justification = justLines.join("\n")
   const grantAmount = designReviewAction?.grantAmount ?? null

@@ -467,22 +467,6 @@ export async function POST(
         orderBy: { createdAt: "desc" },
         select: { id: true },
       })
-      let firstPassReviewerName: string | null = null
-      if (latestSubmission) {
-        const firstPass = await prisma.submissionReview.findFirst({
-          where: { submissionId: latestSubmission.id, isAdminReview: false, result: "APPROVED" },
-          orderBy: { createdAt: "desc" },
-          select: { reviewerId: true },
-        })
-        if (firstPass) {
-          const fpUser = await prisma.user.findUnique({
-            where: { id: firstPass.reviewerId },
-            select: { name: true, email: true },
-          })
-          firstPassReviewerName = fpUser?.name || fpUser?.email || "Unknown"
-        }
-      }
-
       const lines: string[] = []
 
       lines.push(isBuildApproval ? `**Build Review**` : `**Design Review**`)
@@ -497,17 +481,29 @@ export async function POST(
       lines.push(`Part of the time for this project was tracked via journaling. After making sure the project worked, and was shipped, the second pass reviewer decided the deflation.`)
       lines.push("")
 
-      if (firstPassReviewerName) {
-        lines.push(`First-pass reviewer: ${firstPassReviewerName}`)
+      // First-pass review
+      if (latestSubmission) {
+        const firstPass = await prisma.submissionReview.findFirst({
+          where: { submissionId: latestSubmission.id, isAdminReview: false, result: "APPROVED" },
+          orderBy: { createdAt: "desc" },
+          select: { reviewerId: true, feedback: true, createdAt: true },
+        })
+        if (firstPass) {
+          const fpUser = await prisma.user.findUnique({
+            where: { id: firstPass.reviewerId },
+            select: { name: true, email: true },
+          })
+          const fpName = fpUser?.name || fpUser?.email || "Unknown"
+          const fpDate = firstPass.createdAt.toISOString().slice(0, 10)
+          lines.push(`--- First-pass review (${fpDate} by ${fpName}) ---`)
+          if (firstPass.feedback) lines.push(firstPass.feedback)
+          lines.push("")
+        }
       }
 
-      // Second-pass (admin) reviewer's justification
-      if (reasonText) {
-        lines.push(`Reviewer justification (${reviewerName}): "${reasonText}"`)
-        lines.push("")
-      }
-
-      lines.push(`On ${dateStr}, ${reviewerName} (${reviewerEmail}) decided "approved"${reasonText ? ` with reason: ${reasonText}` : "."}`)
+      // Second-pass (admin) review
+      lines.push(`--- Second-pass review (${dateStr} by ${reviewerName}) ---`)
+      if (reasonText) lines.push(reasonText)
       lines.push("")
       lines.push(`The full journal for this project can be found at ${baseUrl}/dashboard/discover/${project!.id}.`)
 
