@@ -181,12 +181,13 @@ export function isEventVisible(today?: string): boolean {
   return t >= TAMAGOTCHI_EVENT.START && t <= graceEndStr;
 }
 
-/** Can the user still complete a 7-day streak starting today? */
-export function canStillComplete(today: string): boolean {
+/** Can the user still complete a 7-day streak before the event ends, given their current streak? */
+export function canStillComplete(today: string, currentStreak: number = 0): boolean {
   const todayDate = new Date(today + 'T12:00:00Z');
   const endDate = new Date(TAMAGOTCHI_EVENT.END + 'T12:00:00Z');
   const daysRemaining = Math.floor((endDate.getTime() - todayDate.getTime()) / (24 * 60 * 60 * 1000)) + 1;
-  return daysRemaining >= TAMAGOTCHI_EVENT.STREAK_GOAL;
+  const daysNeeded = Math.max(0, TAMAGOTCHI_EVENT.STREAK_GOAL - currentStreak);
+  return daysRemaining >= daysNeeded;
 }
 
 // ---- Streak computation ----

@@ -176,7 +176,7 @@ export async function GET(request: NextRequest) {
     currentStreak,
     bestStreak,
     challengeComplete: challengeComplete || reward !== null,
-    canStillComplete: canStillComplete(today),
+    canStillComplete: canStillComplete(today, currentStreak),
     todayProgress,
     reward,
     recentProjectId: recentProject?.id ?? null,
