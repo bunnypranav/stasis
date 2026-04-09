@@ -71,6 +71,39 @@ When `NEXT_PUBLIC_PRELAUNCH_MODE=true`, the site shows RSVP-only mode with refer
 
 Copy `.env.example` for required variables. Key ones: `DATABASE_URL`, `BETTER_AUTH_SECRET`, OAuth client IDs/secrets (HCA, Hackatime, GitHub), `AIRTABLE_API_KEY`, S3 credentials, `SLACK_BOT_TOKEN`.
 
+`.env` also contains `READONLY_PRODUCTION_DATABASE_URL` — a read-only connection to the prod Postgres. Use it whenever the user asks about real users, real projects, or real streak/currency state (the local dev DB is usually empty). It is read-only, so it is safe to query freely; never attempt writes through it. Connections can be flaky — if `psql` fails with "Connection refused", retry once before giving up.
+
+## Looking Up a User by Slack ID
+
+Slack profile URLs look like `https://hackclub.enterprise.slack.com/team/U0A2SJ7B739` — the `U…` segment is `user.slackId` in our DB. To resolve and inspect a user (including Tamagotchi streak state) in one round trip against the prod read replica:
+
+```bash
+psql "$READONLY_PRODUCTION_DATABASE_URL" <<'SQL'
+WITH u AS (SELECT id, email, name FROM "user" WHERE "slackId" = 'U0A2SJ7B739')
+SELECT ws.id, ws."createdAt", ws."effectiveDate",
+       (ws.content IS NOT NULL AND TRIM(ws.content) <> '') AS has_journal
+FROM work_session ws
+JOIN project p ON p.id = ws."projectId"
+JOIN u ON u.id = p."userId"
+WHERE p."deletedAt" IS NULL
+  AND ws."createdAt" >= '2026-03-26'  -- a day before TAMAGOTCHI_EVENT.START
+  AND ws."createdAt" <  '2026-04-15'  -- a day after TAMAGOTCHI_EVENT.END
+ORDER BY ws."createdAt";
+
+SELECT date, "grantedAt"
+FROM streak_grace_day
+WHERE "userId" IN (SELECT id FROM "user" WHERE "slackId" = 'U0A2SJ7B739')
+ORDER BY date;
+SQL
+```
+
+Notes:
+- A day "counts" toward the Tamagotchi streak when it has at least one work session whose `content` is non-empty (the journal entry — see `app/api/tamagotchi/status/route.ts`).
+- **Do NOT filter on `effectiveDate` directly.** That column was added partway through the event, so older sessions have `effectiveDate IS NULL` and the API falls back to computing the date from `createdAt` + the viewer's TZ (`app/api/tamagotchi/status/route.ts:88`, `lib/tamagotchi.ts` `getEffectiveDate`). Filtering on `effectiveDate BETWEEN ...` will silently drop those sessions and undercount the user's real activity. Always filter on `createdAt` and bucket the rows in your head (or in a CASE) using `effectiveDate` when present, otherwise the user's TZ applied to `createdAt`.
+- The event date range (`2026-03-27`–`2026-04-13`) is hard-coded in `lib/tamagotchi.ts` (`TAMAGOTCHI_EVENT.START` / `END`); update the SQL above if those constants change. Pad the `createdAt` window by ±1 day to catch sessions whose effective date falls in-window after the 30-min post-midnight grace.
+- There is no `timezone` column on `user`. If you need to bucket NULL-`effectiveDate` rows precisely, ask the user what TZ the person is in (or check whether the rows are far enough from midnight UTC that the answer is unambiguous under any plausible TZ).
+- Grace days are stored in `streak_grace_day` and are granted via `POST /api/admin/tamagotchi/grace-day` (`app/api/admin/tamagotchi/grace-day/route.ts`); there is no admin UI for it.
+
 ## Granting Admin Roles Locally
 
 To grant a user the ADMIN role in a local dev database:
