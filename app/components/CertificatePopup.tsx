@@ -52,7 +52,11 @@ function getProgressText(built: number, designed: number): string | null {
   return null;
 }
 
-export function CertificatePopup() {
+interface CertificatePopupProps {
+  onDismiss?: () => void;
+}
+
+export function CertificatePopup({ onDismiss }: Readonly<CertificatePopupProps>) {
   const [shouldShow, setShouldShow] = useState(false);
   const [animated, setAnimated] = useState(false);
   const { built, designed, loaded } = useProgress();
@@ -79,7 +83,10 @@ export function CertificatePopup() {
   const dismiss = () => {
     localStorage.setItem(DISMISSED_KEY, '1');
     setAnimated(false);
-    setTimeout(() => setShouldShow(false), 300);
+    setTimeout(() => {
+      setShouldShow(false);
+      onDismiss?.();
+    }, 300);
   };
 
   if (!shouldShow) return null;
