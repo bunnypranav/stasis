@@ -10,6 +10,7 @@ import { NewProjectCard } from '../components/projects/NewProjectCard';
 import { NewProjectModal } from '../components/projects/NewProjectModal';
 import { OnboardingTutorial } from '../components/OnboardingTutorial';
 import { PronounsModal } from '../components/PronounsModal';
+import { CertificatePopup } from '../components/CertificatePopup';
 import { GoalPicker } from '../components/GoalPicker';
 import { PrizeGoalPicker } from '../components/PrizeGoalPicker';
 import { AnimatedResize } from '../components/AnimatedResize';
@@ -653,6 +654,8 @@ export default function ProjectsPage() {
       {showPronounsModal && (
         <PronounsModal onComplete={() => setShowPronounsModal(false)} />
       )}
+
+      <CertificatePopup />
 
       {/* Goal change confirmation dialog */}
       {showGoalPicker && (
