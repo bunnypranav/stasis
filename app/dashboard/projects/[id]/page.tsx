@@ -899,45 +899,73 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
     }
   };
 
-  const handleCartScreenshotUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !project) return;
+  const uploadCartScreenshotFiles = async (files: File[]) => {
+    if (files.length === 0 || !project) return;
 
     setUploadingCartScreenshot(true);
     try {
-      const formData = new FormData();
-      formData.append('file', file);
+      const uploadedUrls: string[] = [];
+      const errors: string[] = [];
 
-      const uploadRes = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
+      await Promise.all(files.map(async (file) => {
+        const formData = new FormData();
+        formData.append('file', file);
 
-      if (!uploadRes.ok) {
-        const data = await uploadRes.json();
-        alert(data.error || 'Failed to upload image');
-        return;
+        const uploadRes = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!uploadRes.ok) {
+          const data = await uploadRes.json();
+          errors.push(data.error || `Failed to upload ${file.name}`);
+          return;
+        }
+
+        const { url } = await uploadRes.json();
+        uploadedUrls.push(url);
+      }));
+
+      if (uploadedUrls.length > 0) {
+        const newScreenshots = [...project.cartScreenshots, ...uploadedUrls];
+
+        const updateRes = await fetch(`/api/projects/${project.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cartScreenshots: newScreenshots }),
+        });
+
+        if (updateRes.ok) {
+          setProject({ ...project, cartScreenshots: newScreenshots });
+        }
       }
 
-      const { url } = await uploadRes.json();
-      const newScreenshots = [...project.cartScreenshots, url];
-
-      const updateRes = await fetch(`/api/projects/${project.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cartScreenshots: newScreenshots }),
-      });
-
-      if (updateRes.ok) {
-        setProject({ ...project, cartScreenshots: newScreenshots });
+      if (errors.length > 0) {
+        alert(`Some uploads failed:\n${errors.join('\n')}`);
       }
     } catch (error) {
-      console.error('Failed to upload cart screenshot:', error);
-      alert('Failed to upload cart screenshot');
+      console.error('Failed to upload cart screenshots:', error);
+      alert('Failed to upload cart screenshots');
     } finally {
       setUploadingCartScreenshot(false);
-      e.target.value = '';
     }
+  };
+
+  const handleCartScreenshotUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    await uploadCartScreenshotFiles(files);
+    e.target.value = '';
+  };
+
+  const [draggingCartScreenshot, setDraggingCartScreenshot] = useState(false);
+  const cartScreenshotDragCounter = useRef(0);
+
+  const handleCartScreenshotDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    cartScreenshotDragCounter.current = 0;
+    setDraggingCartScreenshot(false);
+    const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+    await uploadCartScreenshotFiles(files);
   };
 
   const handleDeleteCartScreenshot = async (url: string) => {
@@ -1938,15 +1966,21 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
 
               {/* Cart Screenshots */}
               {!project.noBomNeeded && bomItems.length > 0 && (
-                <div className="border-t border-cream-400 pt-4 mb-4">
+                <div
+                  className={`border-t border-cream-400 pt-4 mb-4 transition-colors ${draggingCartScreenshot && bomEditable ? 'bg-orange-500/10 ring-2 ring-orange-500 ring-inset' : ''}`}
+                  onDragEnter={(e) => { e.preventDefault(); if (bomEditable) { cartScreenshotDragCounter.current++; setDraggingCartScreenshot(true); } }}
+                  onDragLeave={(e) => { e.preventDefault(); cartScreenshotDragCounter.current--; if (cartScreenshotDragCounter.current <= 0) { cartScreenshotDragCounter.current = 0; setDraggingCartScreenshot(false); } }}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={bomEditable ? handleCartScreenshotDrop : undefined}
+                >
                   <p className="text-brown-800 text-xs uppercase mb-3">Cart Screenshots</p>
                   {project.cartScreenshots.length === 0 ? (
                     <div className="flex items-center gap-3">
-                      <p className="text-cream-600 text-sm">Upload screenshots of your cart with the items you plan to buy.</p>
-                      {bomEditable && (
+                      <p className="text-cream-600 text-sm">{draggingCartScreenshot ? 'Drop images here to upload' : 'Upload screenshots of your cart with the items you plan to buy.'}</p>
+                      {bomEditable && !draggingCartScreenshot && (
                         <label className="shrink-0 bg-orange-500 hover:bg-orange-400 text-white px-3 py-1.5 text-xs uppercase tracking-wider transition-colors cursor-pointer">
                           {uploadingCartScreenshot ? 'Uploading...' : 'Upload'}
-                          <input type="file" accept="image/jpeg,image/png,image/gif,image/webp" onChange={handleCartScreenshotUpload} disabled={uploadingCartScreenshot} className="hidden" />
+                          <input type="file" multiple accept="image/jpeg,image/png,image/gif,image/webp" onChange={handleCartScreenshotUpload} disabled={uploadingCartScreenshot} className="hidden" />
                         </label>
                       )}
                     </div>
@@ -1973,7 +2007,7 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
                               <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
                             </svg>
                           )}
-                          <input type="file" accept="image/jpeg,image/png,image/gif,image/webp" onChange={handleCartScreenshotUpload} disabled={uploadingCartScreenshot} className="hidden" />
+                          <input type="file" multiple accept="image/jpeg,image/png,image/gif,image/webp" onChange={handleCartScreenshotUpload} disabled={uploadingCartScreenshot} className="hidden" />
                         </label>
                       )}
                     </div>
