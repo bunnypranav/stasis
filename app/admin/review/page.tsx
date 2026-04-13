@@ -35,6 +35,7 @@ interface QueueItem {
   claimedBySelf: boolean;
   claimerName: string | null;
   reviewCount: number;
+  sheHerUS: boolean;
 }
 
 interface QueueResponse {
@@ -430,6 +431,7 @@ export default function ReviewQueuePage() {
                             <p className={`text-sm font-medium truncate max-w-[200px] ${
                               item.preReviewed && data.isAdmin ? 'text-orange-400' : 'text-cream-50'
                             }`}>
+                              {item.sheHerUS && <span title="She/Her · United States">⭐ </span>}
                               {item.title}
                             </p>
                             {item.preReviewed && data.isAdmin && (

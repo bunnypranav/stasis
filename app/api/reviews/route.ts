@@ -4,6 +4,7 @@ import { requirePermission } from "@/lib/admin-auth"
 import { Permission, hasRole, Role } from "@/lib/permissions"
 import { getTierById } from "@/lib/tiers"
 import { totalBomCost } from "@/lib/format"
+import { decryptPII } from "@/lib/pii"
 
 export async function GET(request: NextRequest) {
   const authCheck = await requirePermission(Permission.REVIEW_PROJECTS)
@@ -107,7 +108,7 @@ export async function GET(request: NextRequest) {
     prisma.project.findMany({
       where: projectWhere,
       include: {
-        user: { select: { id: true, name: true, email: true, image: true, pronouns: true } },
+        user: { select: { id: true, name: true, email: true, image: true, pronouns: true, encryptedAddressCountry: true } },
         workSessions: { select: { id: true, hoursClaimed: true, hoursApproved: true, createdAt: true } },
         bomItems: { select: { id: true, totalCost: true, status: true } },
         submissions: {
@@ -144,6 +145,18 @@ export async function GET(request: NextRequest) {
 
     const waitingMs = Date.now() - new Date(project.updatedAt).getTime()
 
+    // Check if author is she/her and from the US
+    const isSheHer = !!project.user.pronouns && project.user.pronouns.toLowerCase().includes("she/her")
+    let isUS = false
+    if (isSheHer && project.user.encryptedAddressCountry) {
+      try {
+        const country = decryptPII(project.user.encryptedAddressCountry).toLowerCase().trim()
+        isUS = country === "us" || country === "usa" || country === "united states" || country === "united states of america"
+      } catch {
+        // Decryption may fail if PII_ENCRYPTION_KEY is not set
+      }
+    }
+
     return {
       id: project.id,
       projectId: project.id,
@@ -152,7 +165,7 @@ export async function GET(request: NextRequest) {
       coverImage: project.coverImage,
       category: activeStage,
       tier: project.tier,
-      author: project.user,
+      author: { id: project.user.id, name: project.user.name, email: project.user.email, image: project.user.image },
       workUnits: Math.round(totalWorkUnits * 10) / 10,
       totalWorkUnits: Math.round(allWorkUnits * 10) / 10,
       entryCount,
@@ -173,6 +186,7 @@ export async function GET(request: NextRequest) {
       claimerName: null,
       reviewCount: 0,
       starterProjectId: project.starterProjectId,
+      sheHerUS: isSheHer && isUS,
     }
   })
 
