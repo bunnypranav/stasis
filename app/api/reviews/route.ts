@@ -18,6 +18,7 @@ export async function GET(request: NextRequest) {
   const guide = url.searchParams.get("guide") || "" // starter project ID filter
   const nameSearch = url.searchParams.get("nameSearch") || "" // text search on title/description
   const sort = url.searchParams.get("sort") || "" // "most_hours" for descending hours sort
+  const pronounsFilter = url.searchParams.get("pronouns") || "" // filter by user pronouns
   const page = Math.max(1, parseInt(url.searchParams.get("page") || "1"))
   const limit = Math.min(500, Math.max(1, parseInt(url.searchParams.get("limit") || "20")))
   const offset = (page - 1) * limit
@@ -31,6 +32,14 @@ export async function GET(request: NextRequest) {
   // Exclude fraud-convicted users by default
   if (!showFraud) {
     projectWhere.user = { fraudConvicted: false }
+  }
+
+  // Filter by user pronouns
+  if (pronounsFilter) {
+    projectWhere.user = {
+      ...projectWhere.user,
+      pronouns: { contains: pronounsFilter, mode: "insensitive" },
+    }
   }
 
   // Filter by stage/status
@@ -98,7 +107,7 @@ export async function GET(request: NextRequest) {
     prisma.project.findMany({
       where: projectWhere,
       include: {
-        user: { select: { id: true, name: true, email: true, image: true } },
+        user: { select: { id: true, name: true, email: true, image: true, pronouns: true } },
         workSessions: { select: { id: true, hoursClaimed: true, hoursApproved: true, createdAt: true } },
         bomItems: { select: { id: true, totalCost: true, status: true } },
         submissions: {

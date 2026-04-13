@@ -151,6 +151,7 @@ export default function ReviewDetailPage() {
   const filterGuide = searchParams.get('guide') || '';
   const filterNameSearch = searchParams.get('nameSearch') || '';
   const filterSort = searchParams.get('sort') || '';
+  const filterPronouns = searchParams.get('pronouns') || '';
 
   // Build query string for filter-aware navigation
   const filterQS = (() => {
@@ -159,6 +160,7 @@ export default function ReviewDetailPage() {
     if (filterGuide) qp.set('guide', filterGuide);
     if (filterNameSearch) qp.set('nameSearch', filterNameSearch);
     if (filterSort) qp.set('sort', filterSort);
+    if (filterPronouns) qp.set('pronouns', filterPronouns);
     const s = qp.toString();
     return s ? `?${s}` : '';
   })();
@@ -407,6 +409,7 @@ export default function ReviewDetailPage() {
       const params = new URLSearchParams();
       if (filterCategory) params.set('category', filterCategory);
       if (filterGuide) params.set('guide', filterGuide);
+      if (filterPronouns) params.set('pronouns', filterPronouns);
       params.set('limit', '10');
       const res = await fetch(`/api/reviews?${params}`);
       if (res.ok) {
