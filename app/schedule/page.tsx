@@ -8,7 +8,7 @@ import { DottedLine } from '../components/DottedLine';
 
 // --- Types ---
 
-type EventCategory = 'meal' | 'ceremony' | 'activity' | 'workshop';
+type EventCategory = 'meal' | 'interactive' | 'social' | 'logistics' | 'ambient';
 
 interface ScheduleEvent {
   name: string;
@@ -38,18 +38,12 @@ interface ScheduleDay {
 
 const SLOT_PX = 28;
 
-const CATEGORY_COLORS: Record<EventCategory, string> = {
-  meal: '#E1AB55',
-  ceremony: '#D95D39',
-  activity: '#FC8A58',
-  workshop: '#9C8F88',
-};
-
-const CATEGORY_LABELS: Record<EventCategory, string> = {
-  meal: 'Meal',
-  ceremony: 'Ceremony',
-  activity: 'Activity',
-  workshop: 'Workshop',
+const CATEGORY_COLORS: Record<EventCategory, { border: string; text: string }> = {
+  meal: { border: '#E1AB55', text: '#6B5230' },
+  interactive: { border: '#D95D39', text: '#7A3320' },
+  social: { border: '#C9856B', text: '#6B4536' },
+  logistics: { border: '#C4BDB4', text: '#A09889' },
+  ambient: { border: '#C4BDB4', text: '#A09889' },
 };
 
 const SCHEDULE: ScheduleDay[] = [
@@ -60,10 +54,10 @@ const SCHEDULE: ScheduleDay[] = [
     gridStartHour: 15,
     gridEndHour: 22,
     events: [
-      { name: 'Doors Open & Hanging Out', category: 'activity', startHour: 15, startMinute: 0, durationMinutes: 240 },
-      { name: 'Opening Ceremony', category: 'ceremony', startHour: 19, startMinute: 0, durationMinutes: 60 },
+      { name: 'Doors Open & Hanging Out', category: 'ambient', startHour: 15, startMinute: 0, durationMinutes: 240 },
+      { name: 'Opening Ceremony', category: 'logistics', startHour: 19, startMinute: 0, durationMinutes: 60 },
       { name: 'Dinner', category: 'meal', startHour: 20, startMinute: 0, durationMinutes: 60 },
-      { name: 'Ideas Demo', category: 'activity', startHour: 21, startMinute: 0, durationMinutes: 60 },
+      { name: 'Ideas Demo', category: 'interactive', startHour: 21, startMinute: 0, durationMinutes: 60 },
     ],
     deadlines: [],
   },
@@ -75,13 +69,13 @@ const SCHEDULE: ScheduleDay[] = [
     gridEndHour: 25,
     events: [
       { name: 'Breakfast', category: 'meal', startHour: 8, startMinute: 0, durationMinutes: 60 },
-      { name: 'Workshop', category: 'workshop', startHour: 10, startMinute: 0, durationMinutes: 60 },
-      { name: 'Project Demo', category: 'activity', startHour: 12, startMinute: 0, durationMinutes: 60 },
+      { name: 'Workshop', category: 'interactive', startHour: 10, startMinute: 0, durationMinutes: 60 },
+      { name: 'Project Demo', category: 'interactive', startHour: 12, startMinute: 0, durationMinutes: 60 },
       { name: 'Lunch & Walk to Downtown Austin', category: 'meal', startHour: 13, startMinute: 0, durationMinutes: 180 },
-      { name: 'Workshop', category: 'workshop', startHour: 17, startMinute: 30, durationMinutes: 60 },
+      { name: 'Workshop', category: 'interactive', startHour: 17, startMinute: 30, durationMinutes: 60 },
       { name: 'Dinner & Lightning Talks', category: 'meal', startHour: 19, startMinute: 0, durationMinutes: 60 },
-      { name: 'Just Dance', category: 'activity', startHour: 20, startMinute: 0, durationMinutes: 60 },
-      { name: 'Midnight Surprise', category: 'activity', startHour: 24, startMinute: 1, durationMinutes: 30 },
+      { name: 'Just Dance', category: 'social', startHour: 20, startMinute: 0, durationMinutes: 60 },
+      { name: 'Midnight Surprise', category: 'social', startHour: 24, startMinute: 1, durationMinutes: 30 },
     ],
     deadlines: [],
   },
@@ -93,12 +87,12 @@ const SCHEDULE: ScheduleDay[] = [
     gridEndHour: 25,
     events: [
       { name: 'Breakfast', category: 'meal', startHour: 8, startMinute: 0, durationMinutes: 60 },
-      { name: 'Workshop', category: 'workshop', startHour: 10, startMinute: 0, durationMinutes: 60 },
+      { name: 'Workshop', category: 'interactive', startHour: 10, startMinute: 0, durationMinutes: 60 },
       { name: 'Lunch', category: 'meal', startHour: 13, startMinute: 0, durationMinutes: 60 },
-      { name: 'Project Demo', category: 'activity', startHour: 16, startMinute: 0, durationMinutes: 60 },
+      { name: 'Project Demo', category: 'interactive', startHour: 16, startMinute: 0, durationMinutes: 60 },
       { name: 'Dinner & Lightning Talks', category: 'meal', startHour: 19, startMinute: 0, durationMinutes: 60 },
-      { name: 'Karaoke', category: 'activity', startHour: 20, startMinute: 30, durationMinutes: 30 },
-      { name: 'Midnight Surprise', category: 'activity', startHour: 24, startMinute: 1, durationMinutes: 30 },
+      { name: 'Karaoke', category: 'social', startHour: 20, startMinute: 30, durationMinutes: 30 },
+      { name: 'Midnight Surprise', category: 'social', startHour: 24, startMinute: 1, durationMinutes: 30 },
     ],
     deadlines: [],
   },
@@ -110,9 +104,9 @@ const SCHEDULE: ScheduleDay[] = [
     gridEndHour: 14,
     events: [
       { name: 'Breakfast', category: 'meal', startHour: 8, startMinute: 30, durationMinutes: 60 },
-      { name: 'Project Expo & Demos', category: 'activity', startHour: 9, startMinute: 30, durationMinutes: 90 },
-      { name: 'Closing Ceremony', category: 'ceremony', startHour: 11, startMinute: 0, durationMinutes: 60 },
-      { name: 'Pack Up', category: 'activity', startHour: 12, startMinute: 0, durationMinutes: 60 },
+      { name: 'Project Expo & Demos', category: 'interactive', startHour: 9, startMinute: 30, durationMinutes: 90 },
+      { name: 'Closing Ceremony', category: 'logistics', startHour: 11, startMinute: 0, durationMinutes: 60 },
+      { name: 'Pack Up', category: 'logistics', startHour: 12, startMinute: 0, durationMinutes: 60 },
     ],
     deadlines: [
       { name: 'Project Submission Deadline', hour: 8, minute: 0 },
@@ -203,11 +197,10 @@ function DayGrid({
         const isPast = isToday && nowMinutes >= endMin;
         const isCurrent = isToday && nowMinutes >= startMin && nowMinutes < endMin;
         const showTime = event.durationMinutes > 30;
-
         return (
           <div
             key={`${event.name}-${event.startHour}-${event.startMinute}`}
-            className={`absolute left-[54px] md:left-0 right-4 z-[1] transition-opacity ${isPast ? 'opacity-40' : ''}`}
+            className={`absolute left-[54px] md:left-4 right-4 z-[1] transition-opacity ${isPast ? 'opacity-40' : ''}`}
             style={{ top, height }}
           >
             <div
@@ -215,18 +208,18 @@ function DayGrid({
                 isCurrent ? 'ring-1 ring-orange-500' : ''
               }`}
               style={{
-                borderLeftColor: CATEGORY_COLORS[event.category],
-                borderTopColor: CATEGORY_COLORS[event.category],
+                borderLeftColor: CATEGORY_COLORS[event.category].border,
+                borderTopColor: CATEGORY_COLORS[event.category].border,
                 clipPath: 'polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%)',
               }}
             >
               <div
                 className="absolute inset-0 pointer-events-none"
-                style={{ background: `linear-gradient(to bottom, ${CATEGORY_COLORS[event.category]}14, transparent)` }}
+                style={{ background: `linear-gradient(to bottom, ${CATEGORY_COLORS[event.category].border}14, transparent)` }}
               />
-              <span className="text-xs font-medium text-brown-800 leading-tight relative">{event.name}</span>
+              <span className="text-xs font-medium leading-tight relative" style={{ color: CATEGORY_COLORS[event.category].text }}>{event.name}</span>
               {showTime && (
-                <span className="text-xs text-brown-800 mt-0.5 relative">
+                <span className="text-xs mt-0.5 relative" style={{ color: CATEGORY_COLORS[event.category].text }}>
                   {formatTime(event.startHour, event.startMinute)} – {formatTime(endHour, endMinute)}
                 </span>
               )}
@@ -324,15 +317,6 @@ function ScheduleContent() {
               May 15–18, 2026 <span className="opacity-40 text-[0.5em] inline-block translate-y-[-0.25em]">■</span> Austin, TX <span className="opacity-40 text-[0.5em] inline-block translate-y-[-0.25em]">■</span> All times CT
             </p>
 
-            {/* Category legend */}
-            <div className="flex items-center justify-center gap-4 flex-wrap">
-              {(Object.keys(CATEGORY_COLORS) as EventCategory[]).map(cat => (
-                <div key={cat} className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 shrink-0" style={{ backgroundColor: CATEGORY_COLORS[cat] }} />
-                  <span className="text-xs text-brown-800 uppercase tracking-wider">{CATEGORY_LABELS[cat]}</span>
-                </div>
-              ))}
-            </div>
           </header>
 
           {/* Separator */}
