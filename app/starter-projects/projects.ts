@@ -45,7 +45,7 @@ export const projects: StarterProject[] = [
     badges: ['Analog Sensors'],
     hasTutorial: true,
     hasKit: true,
-    kitCost: 15,
+    kitCost: 10,
     image: 'blinky.webp',
   },
   {
