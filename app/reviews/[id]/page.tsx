@@ -800,7 +800,7 @@ export default function ReviewDetailPage() {
                   type="number"
                   value={grantOverride}
                   onChange={(e) => setGrantOverride(e.target.value)}
-                  placeholder={`Default: ${(data?.submission?.project?.bomCost ?? 0) > 0 ? `BOM cost + $3 = ${Math.ceil((data?.submission?.project?.bomCost ?? 0) + 3)} bits` : 'No BOM cost'}`}
+                  placeholder={`Default: ${(data?.submission?.project?.bomCost ?? 0) > 0 ? `BOM cost rounded up = ${Math.ceil(data?.submission?.project?.bomCost ?? 0)} bits` : 'No BOM cost'}`}
                   className="w-full px-3 py-1.5 text-sm border border-cream-400 bg-cream-50 text-brown-800 focus:outline-none focus:border-orange-500"
                 />
                 {grantOverride && (
