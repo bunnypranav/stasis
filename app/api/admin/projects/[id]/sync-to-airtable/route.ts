@@ -27,8 +27,6 @@ export async function POST(
     return NextResponse.json({ error: "Project not found" }, { status: 404 })
   }
 
-  // Build justification from review history
-  const justLines: string[] = []
   const sessions = project.workSessions
   const designSessions = sessions.filter((s) => s.stage === "DESIGN")
   const buildSessions = sessions.filter((s) => s.stage === "BUILD")
@@ -38,27 +36,41 @@ export async function POST(
   const isBuildApproved = project.buildStatus === "approved"
   const baseUrl = process.env.BETTER_AUTH_URL || "http://localhost:3000"
 
-  justLines.push(isBuildApproved ? `**Build Review**` : `**Design Review**`)
-  justLines.push("")
-  justLines.push(`Project: "${project.title}"`)
-  justLines.push(`User: ${project.user.name || "Unknown"}`)
-  if (tierInfo) justLines.push(`Tier: ${tierInfo.name} (${tierInfo.bits} bits, ${tierInfo.minHours}-${tierInfo.maxHours === Infinity ? "67+" : tierInfo.maxHours}h range)`)
-  justLines.push("")
-
-  // For each stage that's approved, show first-pass + second-pass reviews
-  const stages: Array<{ stage: "DESIGN" | "BUILD"; label: string; hours: number; sessionCount: number }> = []
-  if (project.designStatus === "approved") {
-    stages.push({ stage: "DESIGN", label: "design", hours: designHours, sessionCount: designSessions.length })
+  // Helper: build the common tail (BOM, badges, github, description, journal link)
+  function buildCommonTail(): string[] {
+    const lines: string[] = []
+    const approvedBom = project!.bomItems.filter((b) => b.status === "approved" || b.status === "pending")
+    const bomItemsCost = approvedBom.reduce((sum, b) => sum + b.totalCost, 0)
+    const bomTax = project!.bomTax ?? 0
+    const bomShip = project!.bomShipping ?? 0
+    const bomTotal = bomItemsCost + bomTax + bomShip
+    if (approvedBom.length > 0 || bomTax > 0 || bomShip > 0) {
+      const costParts = [`$${bomItemsCost.toFixed(2)} parts`]
+      if (bomTax > 0) costParts.push(`$${bomTax.toFixed(2)} tax`)
+      if (bomShip > 0) costParts.push(`$${bomShip.toFixed(2)} shipping`)
+      lines.push(`BOM (${approvedBom.length} item${approvedBom.length === 1 ? "" : "s"}, ${costParts.join(" + ")} = $${bomTotal.toFixed(2)} total):`)
+      for (const item of approvedBom) {
+        const detail = item.quantity != null && item.quantity > 1
+          ? `${item.quantity}x = $${item.totalCost.toFixed(2)}`
+          : `$${item.totalCost.toFixed(2)}`
+        lines.push(`  - ${item.name}: ${detail}${item.status === "pending" ? " (pending)" : ""}`)
+      }
+      lines.push("")
+    }
+    if (project!.badges.length > 0) {
+      lines.push(`Badges: ${project!.badges.map((b) => b.badge).join(", ")}`)
+      lines.push("")
+    }
+    if (project!.githubRepo) lines.push(`GitHub: ${project!.githubRepo}`)
+    if (project!.description) lines.push(`Description: ${project!.description}`)
+    lines.push("")
+    lines.push(`The full journal for this project can be found at ${baseUrl}/dashboard/discover/${id}.`)
+    return lines
   }
-  if (isBuildApproved) {
-    stages.push({ stage: "BUILD", label: "build", hours: buildHours, sessionCount: buildSessions.length })
-  }
 
-  for (const { stage, label, hours, sessionCount } of stages) {
-    justLines.push(`This user logged ${hours.toFixed(1)} ${label} hours across ${sessionCount} journal entr${sessionCount === 1 ? "y" : "ies"}.`)
-    justLines.push("")
-
-    // First-pass review
+  // Helper: fetch first-pass and second-pass review text for a stage
+  async function buildStageReviewLines(stage: "DESIGN" | "BUILD", label: string): Promise<string[]> {
+    const lines: string[] = []
     const latestSubmission = await prisma.projectSubmission.findFirst({
       where: { projectId: id, stage },
       orderBy: { createdAt: "desc" },
@@ -77,84 +89,87 @@ export async function POST(
         })
         const fpName = fpUser?.name || fpUser?.email || "Unknown"
         const fpDate = firstPass.createdAt.toISOString().slice(0, 10)
-        justLines.push(`--- First-pass ${label} review (${fpDate} by ${fpName}) ---`)
-        if (firstPass.feedback) justLines.push(firstPass.feedback)
-        justLines.push("")
+        lines.push(`--- First-pass ${label} review (${fpDate} by ${fpName}) ---`)
+        if (firstPass.feedback) lines.push(firstPass.feedback)
+        lines.push("")
       }
     }
-
-    // Second-pass (admin) review
     const reviewAction = await prisma.projectReviewAction.findFirst({
       where: { projectId: id, stage, decision: "APPROVED" },
       orderBy: { createdAt: "desc" },
-      select: { comments: true, createdAt: true, reviewerId: true, grantAmount: true },
+      select: { comments: true, createdAt: true, reviewerId: true },
     })
     if (reviewAction) {
       const reviewer = reviewAction.reviewerId
         ? await prisma.user.findUnique({ where: { id: reviewAction.reviewerId }, select: { name: true, email: true } })
         : null
       const reviewDate = reviewAction.createdAt.toISOString().slice(0, 10)
-      justLines.push(`--- Second-pass ${label} review (${reviewDate} by ${reviewer?.name || reviewer?.email || "Unknown"}) ---`)
-      if (reviewAction.comments) justLines.push(reviewAction.comments)
-      justLines.push("")
+      lines.push(`--- Second-pass ${label} review (${reviewDate} by ${reviewer?.name || reviewer?.email || "Unknown"}) ---`)
+      if (reviewAction.comments) lines.push(reviewAction.comments)
+      lines.push("")
     }
+    return lines
   }
 
-  // BOM
-  const approvedBom = project.bomItems.filter((b) => b.status === "approved" || b.status === "pending")
-  const bomItemsCost = approvedBom.reduce((sum, b) => sum + b.totalCost, 0)
-  const bomTax = project.bomTax ?? 0
-  const bomShip = project.bomShipping ?? 0
-  const bomTotal = bomItemsCost + bomTax + bomShip
-  if (approvedBom.length > 0 || bomTax > 0 || bomShip > 0) {
-    const costParts = [`$${bomItemsCost.toFixed(2)} parts`]
-    if (bomTax > 0) costParts.push(`$${bomTax.toFixed(2)} tax`)
-    if (bomShip > 0) costParts.push(`$${bomShip.toFixed(2)} shipping`)
-    justLines.push(`BOM (${approvedBom.length} item${approvedBom.length === 1 ? "" : "s"}, ${costParts.join(" + ")} = $${bomTotal.toFixed(2)} total):`)
-    for (const item of approvedBom) {
-      const detail = item.quantity != null && item.quantity > 1
-        ? `${item.quantity}x = $${item.totalCost.toFixed(2)}`
-        : `$${item.totalCost.toFixed(2)}`
-      justLines.push(`  - ${item.name}: ${detail}${item.status === "pending" ? " (pending)" : ""}`)
-    }
-    justLines.push("")
-  }
-
-  if (project.badges.length > 0) {
-    justLines.push(`Badges: ${project.badges.map((b) => b.badge).join(", ")}`)
-    justLines.push("")
-  }
-  if (project.githubRepo) justLines.push(`GitHub: ${project.githubRepo}`)
-  if (project.description) justLines.push(`Description: ${project.description}`)
-  justLines.push("")
-  justLines.push(`The full journal for this project can be found at ${baseUrl}/dashboard/discover/${id}.`)
-
-  // Get grant amount from design review action
+  // Build stage-specific justifications
   const designReviewAction = await prisma.projectReviewAction.findFirst({
     where: { projectId: id, stage: "DESIGN", decision: "APPROVED" },
     orderBy: { createdAt: "desc" },
     select: { grantAmount: true },
   })
-
-  const justification = justLines.join("\n")
   const grantAmount = designReviewAction?.grantAmount ?? null
+
+  let designJustification: string | undefined
+  if (project.designStatus === "approved") {
+    const lines: string[] = []
+    lines.push(`**Design Review**`)
+    lines.push("")
+    lines.push(`Project: "${project.title}" (design approval)`)
+    lines.push(`User: ${project.user.name || "Unknown"}`)
+    if (tierInfo) lines.push(`Tier: ${tierInfo.name} (${tierInfo.bits} bits, ${tierInfo.minHours}-${tierInfo.maxHours === Infinity ? "67+" : tierInfo.maxHours}h range)`)
+    lines.push("")
+    lines.push(`This user logged ${designHours.toFixed(1)} design hours across ${designSessions.length} journal entr${designSessions.length === 1 ? "y" : "ies"}.`)
+    lines.push("")
+    lines.push(...await buildStageReviewLines("DESIGN", "design"))
+    lines.push(...buildCommonTail())
+    designJustification = lines.join("\n")
+  }
+
+  let buildJustification: string | undefined
+  if (isBuildApproved) {
+    const lines: string[] = []
+    lines.push(`**Build Review**`)
+    lines.push("")
+    lines.push(`Project: "${project.title}" (build approval)`)
+    lines.push(`User: ${project.user.name || "Unknown"}`)
+    if (tierInfo) lines.push(`Tier: ${tierInfo.name} (${tierInfo.bits} bits, ${tierInfo.minHours}-${tierInfo.maxHours === Infinity ? "67+" : tierInfo.maxHours}h range)`)
+    lines.push("")
+    lines.push(`This user logged ${designHours.toFixed(1)} design hours across ${designSessions.length} journal entr${designSessions.length === 1 ? "y" : "ies"}.`)
+    lines.push("")
+    lines.push(...await buildStageReviewLines("DESIGN", "design"))
+    lines.push(`This user logged ${buildHours.toFixed(1)} build hours across ${buildSessions.length} journal entr${buildSessions.length === 1 ? "y" : "ies"}.`)
+    lines.push("")
+    lines.push(...await buildStageReviewLines("BUILD", "build"))
+    lines.push(...buildCommonTail())
+    buildJustification = lines.join("\n")
+  }
 
   try {
     // Sync every approved stage so manual re-sync can backfill missing records
-    if (project.designStatus === "approved") {
+    if (designJustification !== undefined) {
       await syncProjectToAirtable(
         project.userId,
         project,
-        justification,
+        designJustification,
         grantAmount,
         { approvedHours: designHours },
       )
     }
-    if (isBuildApproved) {
+    if (buildJustification !== undefined) {
       await syncProjectToAirtable(
         project.userId,
         project,
-        justification,
+        buildJustification,
         grantAmount,
         { buildOnly: true },
       )
