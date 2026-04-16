@@ -9,8 +9,8 @@ type Sponsor = {
   name: string;
   src: string;
   href: string;
-  /** Tailwind height classes, responsive. Tune per-logo for optical balance. */
-  heightClass: string;
+  /** Tailwind size classes, responsive. Tune per-logo for optical balance. */
+  sizeClass: string;
 };
 
 const SPONSORS: readonly Sponsor[] = [
@@ -18,13 +18,19 @@ const SPONSORS: readonly Sponsor[] = [
     name: 'Alpha School',
     src: '/alphaschool-logo.svg',
     href: 'https://alpha.school/',
-    heightClass: 'h-16 md:h-24',
+    sizeClass: 'h-16 md:h-24 w-auto',
   },
   {
     name: '021',
     src: '/021-logo.svg',
     href: 'https://www.021.vc/',
-    heightClass: 'h-14 md:h-20',
+    sizeClass: 'h-14 md:h-20 w-auto',
+  },
+  {
+    name: 'Arena Hall',
+    src: '/arenahall.png',
+    href: 'https://www.arenahall.com/',
+    sizeClass: 'w-48 md:w-64 h-auto',
   },
 ] as const;
 
@@ -75,7 +81,7 @@ function SponsorsContent() {
               </div>
 
               {/* Sponsor grid — stacks on mobile, side-by-side on sm+. Append new entries to SPONSORS above. */}
-              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8 list-none p-0 m-0">
+              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8 list-none p-0 m-0 [&>li:last-child:nth-child(odd)]:sm:col-start-1 [&>li:last-child:nth-child(odd)]:sm:col-end-3 [&>li:last-child:nth-child(odd)]:sm:mx-auto [&>li:last-child:nth-child(odd)]:sm:w-[calc(50%-0.75rem)]">
                 {SPONSORS.map((sponsor) => (
                   <li key={sponsor.name}>
                     <a
@@ -89,7 +95,7 @@ function SponsorsContent() {
                       <img
                         src={sponsor.src}
                         alt={sponsor.name}
-                        className={`${sponsor.heightClass} w-auto select-none`}
+                        className={`${sponsor.sizeClass} select-none`}
                       />
                     </a>
                   </li>
