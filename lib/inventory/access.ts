@@ -10,6 +10,21 @@ import {
 } from "./config"
 
 export async function checkInventoryAccess(userId: string) {
+  if (process.env.INVENTORY_HIDDEN === "true") {
+    return {
+      allowed: false,
+      reason: "Inventory is unavailable",
+      isAdmin: false,
+      teamId: null,
+      teamName: null,
+      balance: 0,
+      enabled: false,
+      venueFloors: VENUE_FLOORS,
+      maxConcurrentRentals: MAX_CONCURRENT_RENTALS,
+      allowMultipleOrders: false,
+    }
+  }
+
   const [settings, balanceResult, user, roles] = await Promise.all([
     prisma.inventorySettings.findUnique({ where: { id: "singleton" } }),
     prisma.currencyTransaction.aggregate({
