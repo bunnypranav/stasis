@@ -50,10 +50,12 @@ export async function GET() {
   const reviewers = reviewerIds.length > 0
     ? await prisma.user.findMany({
         where: { id: { in: reviewerIds } },
-        select: { id: true, name: true, image: true },
+        select: { id: true, name: true, slackDisplayName: true, image: true },
       })
     : []
-  const reviewerMap = new Map(reviewers.map((r) => [r.id, r]))
+  const reviewerMap = new Map(
+    reviewers.map((r) => [r.id, { id: r.id, name: r.slackDisplayName || r.name, image: r.image }])
+  )
 
   // Weekly stats
   const weeklyReviews = allReviewActions.filter((r) => new Date(r.createdAt) >= weekAgo)
