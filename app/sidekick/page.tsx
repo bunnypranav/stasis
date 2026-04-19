@@ -70,6 +70,7 @@ export default function SidekickPage() {
   const [activityFilter, setActivityFilter] = useState<ActivityFilter>('all');
   const [projectFilter, setProjectFilter] = useState<ProjectFilter>('all');
   const [sortBy, setSortBy] = useState<SortOption>('last_active');
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     async function fetchAssignees() {
@@ -90,6 +91,16 @@ export default function SidekickPage() {
 
   function filterAndSort(list: Assignee[]): Assignee[] {
     let filtered = list;
+
+    const q = search.trim().toLowerCase();
+    if (q) {
+      filtered = filtered.filter((a) => {
+        const name = (a.name ?? '').toLowerCase();
+        const slack = (a.slackId ?? '').toLowerCase();
+        const projects = a.projects.map((p) => p.title.toLowerCase()).join(' ');
+        return name.includes(q) || slack.includes(q) || projects.includes(q);
+      });
+    }
 
     if (activityFilter !== 'all') {
       filtered = filtered.filter((a) => {
@@ -193,6 +204,15 @@ export default function SidekickPage() {
           </button>
         </div>
 
+        {/* Search */}
+        <input
+          type="search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search assignees by name, Slack ID, or project…"
+          className="w-full bg-cream-100 border border-cream-400 text-cream-800 px-3 py-2 text-sm placeholder:text-cream-500 focus:outline-none focus:border-brand-500"
+        />
+
         {/* Filters */}
         <div className="flex flex-wrap gap-2 items-center">
           <span className="text-cream-600 text-xs uppercase">Activity:</span>
@@ -253,9 +273,9 @@ export default function SidekickPage() {
             <option value="assigned">Recently Assigned</option>
           </select>
 
-          {(activityFilter !== 'all' || projectFilter !== 'all') && (
+          {(activityFilter !== 'all' || projectFilter !== 'all' || search) && (
             <button
-              onClick={() => { setActivityFilter('all'); setProjectFilter('all'); }}
+              onClick={() => { setActivityFilter('all'); setProjectFilter('all'); setSearch(''); }}
               className="px-3 py-1.5 text-xs uppercase text-cream-700 hover:text-brand-500 transition-colors cursor-pointer"
             >
               Clear Filters
