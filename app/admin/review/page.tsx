@@ -36,6 +36,8 @@ interface QueueItem {
   claimerName: string | null;
   reviewCount: number;
   sheHerUS: boolean;
+  attendingEvent?: boolean;
+  region?: 'na' | 'eu' | 'other' | null;
 }
 
 interface QueueResponse {
@@ -89,10 +91,13 @@ export default function ReviewQueuePage() {
   const [searchInput, setSearchInput] = useState('');
   const [statsTab, setStatsTab] = useState<'weekly' | 'allTime'>('weekly');
   const [navigating, setNavigating] = useState(false);
+  const [prioritizeAttending, setPrioritizeAttending] = useState(false);
+  const [region, setRegion] = useState<'' | 'na' | 'eu'>('');
 
   const data = activeTab === 'DESIGN' ? designData : buildData;
 
-  // Navigate into the review flow with a filter applied
+  // Navigate into the review flow with a filter applied. Persistent toolbar filters
+  // (prioritize-attending, region) are folded in automatically.
   async function startFilteredReview(filterCategory: string, filterGuide: string, filterNameSearch?: string, filterSort?: string, filterPronouns?: string) {
     setNavigating(true);
     try {
@@ -102,6 +107,8 @@ export default function ReviewQueuePage() {
       if (filterNameSearch) params.set('nameSearch', filterNameSearch);
       if (filterSort) params.set('sort', filterSort);
       if (filterPronouns) params.set('pronouns', filterPronouns);
+      if (prioritizeAttending) params.set('prioritizeAttending', 'true');
+      if (region) params.set('region', region);
       params.set('limit', '1');
       const res = await fetch(`/api/reviews?${params}`);
       if (res.ok) {
@@ -113,6 +120,8 @@ export default function ReviewQueuePage() {
           if (filterNameSearch) qp.set('nameSearch', filterNameSearch);
           if (filterSort) qp.set('sort', filterSort);
           if (filterPronouns) qp.set('pronouns', filterPronouns);
+          if (prioritizeAttending) qp.set('prioritizeAttending', 'true');
+          if (region) qp.set('region', region);
           router.push(`/admin/review/${items[0].id}?${qp}`);
           return;
         }
@@ -130,6 +139,8 @@ export default function ReviewQueuePage() {
     try {
       const baseParams = new URLSearchParams();
       if (search) baseParams.set('search', search);
+      if (prioritizeAttending) baseParams.set('prioritizeAttending', 'true');
+      if (region) baseParams.set('region', region);
       baseParams.set('limit', '500');
 
       const designParams = new URLSearchParams(baseParams);
@@ -148,7 +159,7 @@ export default function ReviewQueuePage() {
     } finally {
       setLoading(false);
     }
-  }, [search]);
+  }, [search, prioritizeAttending, region]);
 
   const fetchStats = useCallback(async () => {
     try {
@@ -347,6 +358,33 @@ export default function ReviewQueuePage() {
           >
             She/Her Priority
           </button>
+
+          <span className="border-l border-cream-500/30 mx-1 hidden sm:inline-block" />
+
+          <button
+            onClick={() => setPrioritizeAttending(!prioritizeAttending)}
+            title="Float projects from users attending the in-person event to the top"
+            className={`px-3 py-1.5 text-xs uppercase tracking-wider border cursor-pointer ${
+              prioritizeAttending
+                ? 'border-orange-500 text-orange-400 bg-orange-500/10'
+                : 'border-cream-500/30 text-cream-100 hover:border-orange-500'
+            }`}
+          >
+            Prioritize Attendees
+          </button>
+          <select
+            value={region}
+            onChange={(e) => setRegion(e.target.value as '' | 'na' | 'eu')}
+            className={`px-3 py-1.5 text-xs uppercase tracking-wider border cursor-pointer bg-brown-800 ${
+              region
+                ? 'border-orange-500 text-orange-400'
+                : 'border-cream-500/30 text-cream-100 hover:border-orange-500'
+            }`}
+          >
+            <option value="">All Regions</option>
+            <option value="na">North America</option>
+            <option value="eu">Europe</option>
+          </select>
         </div>
 
         <form onSubmit={handleSearch} className="flex gap-2">
@@ -434,9 +472,22 @@ export default function ReviewQueuePage() {
                               {item.sheHerUS && <span title="She/Her · United States">⭐ </span>}
                               {item.title}
                             </p>
-                            {item.preReviewed && data.isAdmin && (
-                              <span className="text-xs text-orange-500 uppercase">Pre-reviewed</span>
-                            )}
+                            <div className="flex gap-1 items-center mt-0.5">
+                              {item.preReviewed && data.isAdmin && (
+                                <span className="text-xs text-orange-500 uppercase">Pre-reviewed</span>
+                              )}
+                              {item.attendingEvent && (
+                                <span title="Attending the in-person event" className="text-[10px] uppercase px-1 py-0.5 bg-orange-500/20 text-orange-300 border border-orange-500/40">
+                                  Attending
+                                </span>
+                              )}
+                              {item.region === 'na' && (
+                                <span className="text-[10px] uppercase px-1 py-0.5 bg-cream-500/10 text-cream-200 border border-cream-500/20">NA</span>
+                              )}
+                              {item.region === 'eu' && (
+                                <span className="text-[10px] uppercase px-1 py-0.5 bg-cream-500/10 text-cream-200 border border-cream-500/20">EU</span>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </td>

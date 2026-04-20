@@ -31,6 +31,8 @@ interface QueueItem {
   claimedBySelf: boolean;
   claimerName: string | null;
   reviewCount: number;
+  attendingEvent?: boolean;
+  region?: 'na' | 'eu' | 'other' | null;
 }
 
 interface QueueResponse {
@@ -80,6 +82,8 @@ export default function ReviewQueuePage() {
   const [page, setPage] = useState(1);
   const [statsTab, setStatsTab] = useState<'weekly' | 'allTime'>('weekly');
   const [showFraud, setShowFraud] = useState(false);
+  const [prioritizeAttending, setPrioritizeAttending] = useState(false);
+  const [region, setRegion] = useState<'' | 'na' | 'eu'>('');
 
   const fetchQueue = useCallback(async () => {
     setLoading(true);
@@ -88,6 +92,8 @@ export default function ReviewQueuePage() {
       if (search) params.set('search', search);
       if (category) params.set('category', category);
       if (showFraud) params.set('showFraud', 'true');
+      if (prioritizeAttending) params.set('prioritizeAttending', 'true');
+      if (region) params.set('region', region);
       params.set('page', page.toString());
       const res = await fetch(`/api/reviews?${params}`);
       if (res.ok) setData(await res.json());
@@ -96,7 +102,7 @@ export default function ReviewQueuePage() {
     } finally {
       setLoading(false);
     }
-  }, [search, category, page, showFraud]);
+  }, [search, category, page, showFraud, prioritizeAttending, region]);
 
   const fetchStats = useCallback(async () => {
     try {
@@ -230,6 +236,30 @@ export default function ReviewQueuePage() {
           >
             Fraud
           </button>
+          <button
+            onClick={() => { setPrioritizeAttending(!prioritizeAttending); setPage(1); }}
+            title="Float projects from users attending the in-person event to the top"
+            className={`px-3 py-1.5 text-xs uppercase tracking-wider border cursor-pointer ${
+              prioritizeAttending
+                ? 'border-orange-500 text-orange-500 bg-orange-500/10'
+                : 'border-cream-400 text-brown-800 hover:border-orange-500'
+            }`}
+          >
+            Prioritize Attendees
+          </button>
+          <select
+            value={region}
+            onChange={(e) => { setRegion(e.target.value as '' | 'na' | 'eu'); setPage(1); }}
+            className={`px-3 py-1.5 text-xs uppercase tracking-wider border cursor-pointer bg-cream-100 ${
+              region
+                ? 'border-orange-500 text-orange-500'
+                : 'border-cream-400 text-brown-800 hover:border-orange-500'
+            }`}
+          >
+            <option value="">All Regions</option>
+            <option value="na">North America</option>
+            <option value="eu">Europe</option>
+          </select>
         </div>
 
         <form onSubmit={handleSearch} className="flex gap-2">
@@ -313,9 +343,22 @@ export default function ReviewQueuePage() {
                             }`}>
                               {item.title}
                             </p>
-                            {item.preReviewed && data.isAdmin && (
-                              <span className="text-xs text-orange-500 uppercase">Pre-reviewed</span>
-                            )}
+                            <div className="flex gap-1 items-center">
+                              {item.preReviewed && data.isAdmin && (
+                                <span className="text-xs text-orange-500 uppercase">Pre-reviewed</span>
+                              )}
+                              {item.attendingEvent && (
+                                <span title="Attending the in-person event" className="text-[10px] uppercase px-1 py-0.5 bg-orange-100 text-orange-700 border border-orange-300">
+                                  Attending
+                                </span>
+                              )}
+                              {item.region === 'na' && (
+                                <span className="text-[10px] uppercase px-1 py-0.5 bg-cream-200 text-brown-800 border border-cream-400">NA</span>
+                              )}
+                              {item.region === 'eu' && (
+                                <span className="text-[10px] uppercase px-1 py-0.5 bg-cream-200 text-brown-800 border border-cream-400">EU</span>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </td>
