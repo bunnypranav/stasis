@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import PageBorder from '../components/PageBorder';
 import { NoiseOverlay } from '../components/NoiseOverlay';
@@ -11,6 +11,7 @@ type Sponsor = {
   href: string;
   /** Tailwind size classes, responsive. Tune per-logo for optical balance. */
   sizeClass: string;
+  blurb?: string;
 };
 
 const SPONSORS: readonly Sponsor[] = [
@@ -19,6 +20,8 @@ const SPONSORS: readonly Sponsor[] = [
     src: '/alphaschool-logo.svg',
     href: 'https://alpha.school/',
     sizeClass: 'h-16 md:h-24 w-auto',
+    blurb:
+      'Alpha School is an AI-powered private K-12 network where students master core academics in just 2 hours a day using personalized learning paths and spend afternoons on life skills and entrepreneurial passion projects.',
   },
   {
     name: '021',
@@ -31,8 +34,105 @@ const SPONSORS: readonly Sponsor[] = [
     src: '/arenahall.png',
     href: 'https://www.arenahall.com/',
     sizeClass: 'w-48 md:w-64 h-auto',
+    blurb:
+      "Arena Hall, where Stasis is hosted, was founded in Austin, TX to find, convene, and serve purpose-driven individuals building the future. Its members are creating solutions to society's biggest challenges in energy, education, space, and infrastructure.",
   },
 ] as const;
+
+const SCRAMBLE_CHARSET =
+  'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%&*';
+
+function ScrambleText({
+  text,
+  active,
+  duration = 0.5,
+  staggerMax = 0.25,
+  delayMax = 0.1,
+}: Readonly<{
+  text: string;
+  active: boolean;
+  duration?: number;
+  staggerMax?: number;
+  delayMax?: number;
+}>) {
+  const [display, setDisplay] = useState(text);
+  const frameRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!active) {
+      setDisplay(text);
+      return;
+    }
+
+    const chars = text.split('');
+    const lockTimes = chars.map((c, i) =>
+      /[^\w]/.test(c) || c === ' '
+        ? 0
+        : (Math.random() * delayMax + (i / chars.length) * staggerMax) * 1000
+    );
+    const start = performance.now();
+    const totalMs = duration * 1000;
+
+    const tick = () => {
+      const elapsed = performance.now() - start;
+      const next = chars.map((c, i) => {
+        if (c === ' ' || /[^\w]/.test(c)) return c;
+        if (elapsed >= lockTimes[i]) return c;
+        return SCRAMBLE_CHARSET[Math.floor(Math.random() * SCRAMBLE_CHARSET.length)];
+      });
+      setDisplay(next.join(''));
+
+      if (elapsed < totalMs) {
+        frameRef.current = requestAnimationFrame(tick);
+      } else {
+        setDisplay(text);
+      }
+    };
+
+    frameRef.current = requestAnimationFrame(tick);
+
+    return () => {
+      if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
+    };
+  }, [active, text, duration, staggerMax, delayMax]);
+
+  return <>{display}</>;
+}
+
+function SponsorCard({ sponsor }: Readonly<{ sponsor: Sponsor }>) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <li>
+      <a
+        href={sponsor.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={sponsor.name}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        onFocus={() => setHovered(true)}
+        onBlur={() => setHovered(false)}
+        className="group relative block bg-cream-100/60 border border-cream-400 p-8 md:p-12 h-44 md:h-56 overflow-hidden transition-colors hover:bg-cream-100 hover:border-[#d95d39]"
+      >
+        <div
+          className={`flex items-center justify-center h-full w-full transition duration-300 ${sponsor.blurb ? 'group-hover:blur-md group-hover:opacity-40' : ''}`}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element -- plain <img> so per-sponsor height classes drive sizing dynamically */}
+          <img
+            src={sponsor.src}
+            alt={sponsor.name}
+            className={`${sponsor.sizeClass} select-none`}
+          />
+        </div>
+        {sponsor.blurb && (
+          <p className="absolute inset-0 flex items-center m-0 px-6 md:px-8 text-sm leading-relaxed text-brown-800 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+            <ScrambleText text={sponsor.blurb} active={hovered} />
+          </p>
+        )}
+      </a>
+    </li>
+  );
+}
 
 function SponsorsContent() {
   const [footerHeight, setFooterHeight] = useState(0);
@@ -83,22 +183,7 @@ function SponsorsContent() {
               {/* Sponsor grid — stacks on mobile, side-by-side on sm+. Append new entries to SPONSORS above. */}
               <ul className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8 list-none p-0 m-0 [&>li:last-child:nth-child(odd)]:sm:col-start-1 [&>li:last-child:nth-child(odd)]:sm:col-end-3 [&>li:last-child:nth-child(odd)]:sm:mx-auto [&>li:last-child:nth-child(odd)]:sm:w-[calc(50%-0.75rem)]">
                 {SPONSORS.map((sponsor) => (
-                  <li key={sponsor.name}>
-                    <a
-                      href={sponsor.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={sponsor.name}
-                      className="bg-cream-100/60 border border-cream-400 flex items-center justify-center p-8 md:p-12 h-44 md:h-56 transition-colors hover:bg-cream-100 hover:border-[#d95d39]"
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element -- plain <img> so per-sponsor height classes drive sizing dynamically */}
-                      <img
-                        src={sponsor.src}
-                        alt={sponsor.name}
-                        className={`${sponsor.sizeClass} select-none`}
-                      />
-                    </a>
-                  </li>
+                  <SponsorCard key={sponsor.name} sponsor={sponsor} />
                 ))}
               </ul>
             </section>
