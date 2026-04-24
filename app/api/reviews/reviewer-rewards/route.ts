@@ -3,9 +3,11 @@ import prisma from "@/lib/prisma"
 import { requirePermission } from "@/lib/admin-auth"
 import { Permission } from "@/lib/permissions"
 
-// Fudge & Hoodie event window: reviews from 2026-04-23 through 2026-05-07 inclusive.
-const WINDOW_START = new Date("2026-04-23T00:00:00.000Z")
-const WINDOW_END = new Date("2026-05-08T00:00:00.000Z") // exclusive upper bound
+// Fudge & Hoodie event window: reviews from 2026-04-23 00:00 ET through
+// 2026-05-07 23:59:59.999 ET inclusive. Anchor in Eastern Time so boundaries
+// match the calendar day HC participants see, regardless of server TZ.
+const WINDOW_START = new Date("2026-04-23T00:00:00-04:00")
+const WINDOW_END = new Date("2026-05-08T00:00:00-04:00") // exclusive upper bound
 
 const FUDGE_THRESHOLD = 40
 const HOODIE_THRESHOLD = 65

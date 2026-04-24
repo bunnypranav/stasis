@@ -615,7 +615,7 @@ function FudgeHoodieStats({ rewards, loading }: Readonly<{ rewards: RewardRespon
   }
 
   const fmtDate = (iso: string) =>
-    new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'America/New_York' });
 
   return (
     <div>
